@@ -1,6 +1,3 @@
-"use client"
-
-import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Download, Play } from "lucide-react"
@@ -9,93 +6,45 @@ import Link from "next/link"
 import { getFeaturedResources } from "@/app/actions/resources"
 
 // Mock data as fallback
-const mockFeaturedResources = [
+const mockResources = [
   {
     id: "customer-onboarding",
+    slug: "customer-onboarding",
     title: "Customer Onboarding Flow",
     description: "Complete welcome series with progress tracking",
     thumbnail: "/placeholder.svg?height=200&width=300",
     category: "MAKE_TEMPLATES",
     hasGuide: true,
-    slug: "customer-onboarding-flow",
+    downloadsCount: 0,
   },
   {
     id: "social-media-scheduler",
+    slug: "social-media-scheduler",
     title: "Social Media Scheduler",
     description: "Multi-platform content automation",
     thumbnail: "/placeholder.svg?height=200&width=300",
     category: "ZAPIER_TEMPLATES",
     hasGuide: false,
-    slug: "social-media-scheduler",
+    downloadsCount: 0,
   },
   {
     id: "invoice-automation",
+    slug: "invoice-automation",
     title: "Invoice Automation",
     description: "Complete billing and payment reminders",
     thumbnail: "/placeholder.svg?height=200&width=300",
     category: "N8N_TEMPLATES",
     hasGuide: true,
-    slug: "invoice-automation",
+    downloadsCount: 0,
   },
 ]
 
-function getCategoryLabel(category: string) {
-  const labels: Record<string, string> = {
-    MAKE_TEMPLATES: "Make.com",
-    ZAPIER_TEMPLATES: "Zapier",
-    N8N_TEMPLATES: "n8n",
-    AUTOMATION_GUIDES: "Guide",
-    TOOLS_RESOURCES: "Tool",
-  }
-  return labels[category] || "Template"
-}
+export async function FeaturedResourcesSection() {
+  // Try to fetch real data, fallback to mock data
+  let resources = await getFeaturedResources()
 
-export function FeaturedResourcesSection() {
-  const [resources, setResources] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    async function loadResources() {
-      try {
-        const featuredResources = await getFeaturedResources()
-
-        if (featuredResources.length > 0) {
-          setResources(featuredResources)
-        } else {
-          // Use mock data as fallback
-          setResources(mockFeaturedResources)
-        }
-      } catch (error) {
-        console.error("Failed to load featured resources:", error)
-        setResources(mockFeaturedResources)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadResources()
-  }, [])
-
-  if (loading) {
-    return (
-      <AnimatedSection className="py-20 bg-[#09111f]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="h-8 bg-gray-700 rounded w-3/4 mx-auto mb-4 animate-pulse" />
-            <div className="h-4 bg-gray-700 rounded w-1/2 mx-auto animate-pulse" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-gray-800/50 rounded-lg p-6 animate-pulse">
-                <div className="h-40 bg-gray-700 rounded mb-4" />
-                <div className="h-4 bg-gray-700 rounded mb-2" />
-                <div className="h-3 bg-gray-700 rounded w-3/4" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </AnimatedSection>
-    )
+  if (resources.length === 0) {
+    resources = mockResources as any
   }
 
   return (
@@ -117,13 +66,13 @@ export function FeaturedResourcesSection() {
               <CardContent className="p-0">
                 <div className="relative aspect-video bg-gradient-to-br from-gray-700 to-gray-800">
                   <img
-                    src={resource.thumbnail || "/placeholder.svg"}
+                    src={resource.thumbnail || "/placeholder.svg?height=200&width=300"}
                     alt={resource.title}
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute top-3 left-3">
                     <span className="bg-[#ca6678] text-white text-xs font-medium px-2 py-1 rounded">
-                      {getCategoryLabel(resource.category)}
+                      {resource.category.replace("_", " ")}
                     </span>
                   </div>
                 </div>

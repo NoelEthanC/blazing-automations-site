@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-// Fetch published videos for public
+// Fetch published videos for public pages
 export async function getPublishedVideos() {
   try {
     const videos = await prisma.watchUsBuildVideo.findMany({
@@ -43,8 +43,8 @@ export async function getFeaturedVideo() {
   }
 }
 
-// Admin: Get all videos
-export async function getAllVideosForAdmin() {
+// Admin: Fetch all videos
+export async function getAllVideos() {
   try {
     await requireAdmin()
 
@@ -56,7 +56,7 @@ export async function getAllVideosForAdmin() {
 
     return videos
   } catch (error) {
-    console.error("Failed to fetch admin videos:", error)
+    console.error("Failed to fetch all videos:", error)
     return []
   }
 }

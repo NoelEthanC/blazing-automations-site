@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
-// Get site content by key
+// Fetch site content by key
 export async function getSiteContent(key: string) {
   try {
     const content = await prisma.siteContent.findUnique({
@@ -13,12 +13,12 @@ export async function getSiteContent(key: string) {
 
     return content
   } catch (error) {
-    console.error(`Failed to fetch site content for ${key}:`, error)
+    console.error(`Failed to fetch content for ${key}:`, error)
     return null
   }
 }
 
-// Get all site content
+// Fetch all site content
 export async function getAllSiteContent() {
   try {
     const content = await prisma.siteContent.findMany({
@@ -34,66 +34,49 @@ export async function getAllSiteContent() {
   }
 }
 
-// Update site content
-export async function updateSiteContentAction(prevState: any, formData: FormData) {
+// Admin: Update site content
+export async function updateSiteContent(prevState: any, formData: FormData) {
   try {
     await requireAdmin()
 
-    const section = formData.get("section") as string
+    const key = formData.get("key") as string
     const title = formData.get("title") as string
-    const subtitle = formData.get("subtitle") as string
-    const description = formData.get("description") as string
     const content = formData.get("content") as string
-    const ctaText = formData.get("ctaText") as string
-    const email = formData.get("email") as string
-    const phone = formData.get("phone") as string
-    const address = formData.get("address") as string
 
-    // Prepare content data based on section
-    let contentData: any = {}
+    // Parse additional fields based on content type
+    const metadata: any = {}
 
-    switch (section) {
-      case "hero":
-        contentData = {
-          title,
-          subtitle,
-          ctaText,
-        }
-        break
-      case "services":
-        contentData = {
-          title,
-          description,
-        }
-        break
-      case "about":
-        contentData = {
-          title,
-          content,
-        }
-        break
-      case "contact":
-        contentData = {
-          email,
-          phone,
-          address,
-        }
-        break
+    // Hero section
+    if (key === "hero") {
+      metadata.subtitle = formData.get("subtitle") as string
+      metadata.ctaText = formData.get("ctaText") as string
+      metadata.ctaUrl = formData.get("ctaUrl") as string
     }
 
-    // Upsert content
+    // Services section
+    if (key === "services") {
+      metadata.description = formData.get("description") as string
+    }
+
+    // Contact section
+    if (key === "contact") {
+      metadata.email = formData.get("email") as string
+      metadata.phone = formData.get("phone") as string
+      metadata.address = formData.get("address") as string
+    }
+
     await prisma.siteContent.upsert({
-      where: { key: section },
+      where: { key },
       update: {
         title: title || null,
-        content: JSON.stringify(contentData),
-        metadata: contentData,
+        content,
+        metadata,
       },
       create: {
-        key: section,
+        key,
         title: title || null,
-        content: JSON.stringify(contentData),
-        metadata: contentData,
+        content,
+        metadata,
       },
     })
 
@@ -102,10 +85,32 @@ export async function updateSiteContentAction(prevState: any, formData: FormData
 
     return { success: true }
   } catch (error) {
-    console.error("Content update failed:", error)
+    console.error("Failed to update site content:", error)
     return {
       success: false,
       error: "Failed to update content. Please try again.",
+    }
+  }
+}
+
+// Admin: Delete site content
+export async function deleteSiteContent(key: string) {
+  try {
+    await requireAdmin()
+
+    await prisma.siteContent.delete({
+      where: { key },
+    })
+
+    revalidatePath("/")
+    revalidatePath("/admin/content")
+
+    return { success: true }
+  } catch (error) {
+    console.error("Failed to delete site content:", error)
+    return {
+      success: false,
+      error: "Failed to delete content. Please try again.",
     }
   }
 }

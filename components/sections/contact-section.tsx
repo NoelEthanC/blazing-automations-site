@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, Phone, MapPin, Send, Loader2, CheckCircle, AlertCircle } from "lucide-react"
+import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, Loader2 } from "lucide-react"
 import { AnimatedSection } from "@/components/ui/animated-section"
 import { submitContactForm } from "@/app/actions/contact"
 
@@ -14,12 +14,12 @@ export function ContactSection() {
   const [state, formAction, isPending] = useActionState(submitContactForm, null)
 
   return (
-    <AnimatedSection className="py-20 bg-[#09111f]">
+    <AnimatedSection className="py-20 bg-[#09111f]" id="contact">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Get In Touch</h2>
           <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            Ready to automate your business? Let's discuss your specific needs and create a custom solution.
+            Ready to automate your business? Let's discuss how we can help you save time and increase efficiency.
           </p>
         </div>
 
@@ -31,7 +31,7 @@ export function ContactSection() {
             </CardHeader>
             <CardContent>
               {state?.success && (
-                <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 mb-6">
+                <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                   <div className="flex items-center gap-2 text-green-400">
                     <CheckCircle className="h-5 w-5" />
                     <span>{state.message}</span>
@@ -40,7 +40,7 @@ export function ContactSection() {
               )}
 
               {state?.error && (
-                <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
                   <div className="flex items-center gap-2 text-red-400">
                     <AlertCircle className="h-5 w-5" />
                     <span>{state.error}</span>
@@ -57,7 +57,7 @@ export function ContactSection() {
                     <Input
                       id="name"
                       name="name"
-                      placeholder="Your full name"
+                      placeholder="Your name"
                       className="bg-gray-900 border-gray-700 text-white"
                       required
                     />
@@ -124,13 +124,13 @@ export function ContactSection() {
             </CardContent>
           </Card>
 
-          {/* Contact Information */}
+          {/* Contact Info */}
           <div className="space-y-8">
             <div>
               <h3 className="text-2xl font-bold text-white mb-6">Let's start a conversation</h3>
               <p className="text-gray-400 mb-8">
-                We're here to help you streamline your business processes with powerful automation solutions. Reach out
-                to us through any of the channels below.
+                We're here to help you transform your business with powerful automation solutions. Reach out to us
+                through any of the channels below.
               </p>
             </div>
 
@@ -153,7 +153,7 @@ export function ContactSection() {
                 <div>
                   <h4 className="text-white font-semibold mb-1">Phone</h4>
                   <p className="text-gray-400">+1 (555) 123-4567</p>
-                  <p className="text-sm text-gray-500">Mon-Fri, 9am-6pm EST</p>
+                  <p className="text-sm text-gray-500">Mon-Fri 9AM-6PM EST</p>
                 </div>
               </div>
 
@@ -172,11 +172,11 @@ export function ContactSection() {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-[#3f79ff]/10 to-[#ca6678]/10 border border-[#3f79ff]/20 rounded-lg p-6">
-              <h4 className="text-white font-semibold mb-2">Quick Response Guarantee</h4>
+            <div className="bg-gradient-to-r from-[#3f79ff]/10 to-[#ca6678]/10 p-6 rounded-lg border border-[#3f79ff]/20">
+              <h4 className="text-white font-semibold mb-2">Free Consultation</h4>
               <p className="text-gray-400 text-sm">
-                We understand that time is money. That's why we guarantee a response to all inquiries within 24 hours,
-                often much sooner.
+                Book a 30-minute free consultation to discuss your automation needs and get personalized
+                recommendations.
               </p>
             </div>
           </div>

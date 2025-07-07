@@ -1,5 +1,5 @@
 import { auth, currentUser } from "@clerk/nextjs/server"
-import { prisma } from "./prisma"
+import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 
 export async function requireAuth() {
@@ -13,58 +13,47 @@ export async function requireAuth() {
 }
 
 export async function requireAdmin() {
-  const clerkUser = await currentUser()
+  const user = await currentUser()
 
-  if (!clerkUser) {
+  if (!user) {
     redirect("/sign-in")
   }
 
-  // Sync user with database
-  const user = await prisma.user.upsert({
-    where: { clerkId: clerkUser.id },
-    update: {
-      email: clerkUser.emailAddresses[0]?.emailAddress || "",
-      firstName: clerkUser.firstName,
-      lastName: clerkUser.lastName,
-    },
-    create: {
-      clerkId: clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress || "",
-      firstName: clerkUser.firstName,
-      lastName: clerkUser.lastName,
-      role: "USER", // Default role, manually promote to ADMIN in database
-    },
+  // Check if user exists in database and is admin
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: user.id },
   })
 
-  if (user.role !== "ADMIN") {
-    redirect("/")
+  if (!dbUser || dbUser.role !== "ADMIN") {
+    throw new Error("Admin access required")
   }
 
-  return user
+  return dbUser
 }
 
 export async function getCurrentUser() {
-  const clerkUser = await currentUser()
+  const user = await currentUser()
 
-  if (!clerkUser) {
+  if (!user) {
     return null
   }
 
-  const user = await prisma.user.upsert({
-    where: { clerkId: clerkUser.id },
+  // Sync user with database
+  const dbUser = await prisma.user.upsert({
+    where: { clerkId: user.id },
     update: {
-      email: clerkUser.emailAddresses[0]?.emailAddress || "",
-      firstName: clerkUser.firstName,
-      lastName: clerkUser.lastName,
+      email: user.emailAddresses[0]?.emailAddress || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
     },
     create: {
-      clerkId: clerkUser.id,
-      email: clerkUser.emailAddresses[0]?.emailAddress || "",
-      firstName: clerkUser.firstName,
-      lastName: clerkUser.lastName,
+      clerkId: user.id,
+      email: user.emailAddresses[0]?.emailAddress || "",
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
       role: "USER",
     },
   })
 
-  return user
+  return dbUser
 }

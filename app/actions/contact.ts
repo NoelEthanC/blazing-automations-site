@@ -11,6 +11,7 @@ export async function submitContactForm(prevState: any, formData: FormData) {
     const company = formData.get("company") as string
     const message = formData.get("message") as string
 
+    // Validate required fields
     if (!name || !email || !message) {
       return {
         success: false,
@@ -42,7 +43,7 @@ export async function submitContactForm(prevState: any, formData: FormData) {
           <p><strong>Message:</strong></p>
           <p>${message.replace(/\n/g, "<br>")}</p>
           <hr>
-          <p><small>Submitted at: ${new Date().toLocaleString()}</small></p>
+          <p><small>Submission ID: ${submission.id}</small></p>
         `,
       })
     } catch (emailError) {
@@ -56,7 +57,7 @@ export async function submitContactForm(prevState: any, formData: FormData) {
         to: email,
         subject: "Thank you for contacting Blazing Automations",
         html: `
-          <h2>Thank you for reaching out!</h2>
+          <h2>Thank you for your message!</h2>
           <p>Hi ${name},</p>
           <p>We've received your message and will get back to you within 24 hours.</p>
           <p>Here's a copy of what you sent:</p>
@@ -69,8 +70,6 @@ export async function submitContactForm(prevState: any, formData: FormData) {
     } catch (emailError) {
       console.error("Failed to send confirmation email:", emailError)
     }
-
-    revalidatePath("/admin/contacts")
 
     return {
       success: true,

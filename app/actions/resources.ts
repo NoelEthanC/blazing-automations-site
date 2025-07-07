@@ -92,8 +92,8 @@ export async function getResourceBySlug(slug: string) {
         downloads: {
           select: {
             id: true,
-            email: true,
             createdAt: true,
+            email: true,
           },
           orderBy: {
             createdAt: "desc",
@@ -111,7 +111,7 @@ export async function getResourceBySlug(slug: string) {
 }
 
 // Admin: Fetch all resources
-export async function getAllResourcesForAdmin() {
+export async function getAllResources() {
   try {
     await requireAdmin()
 
@@ -136,7 +136,7 @@ export async function getAllResourcesForAdmin() {
 
     return resources
   } catch (error) {
-    console.error("Failed to fetch admin resources:", error)
+    console.error("Failed to fetch all resources:", error)
     return []
   }
 }
@@ -156,43 +156,50 @@ export async function createResource(prevState: any, formData: FormData) {
     const featured = formData.get("featured") === "on"
     const published = formData.get("published") === "on"
 
-    // Generate slug from title
+    // Handle file uploads
+    const thumbnailFile = formData.get("thumbnail") as File
+    const resourceFile = formData.get("resourceFile") as File
+
+    let thumbnailPath = null
+    let filePath = null
+
+    // Upload thumbnail
+    if (thumbnailFile && thumbnailFile.size > 0) {
+      const thumbnailDir = join(process.cwd(), "public", "uploads", "thumbnails")
+      await mkdir(thumbnailDir, { recursive: true })
+
+      const thumbnailExt = thumbnailFile.name.split(".").pop()
+      const thumbnailName = `${nanoid()}.${thumbnailExt}`
+      const thumbnailFullPath = join(thumbnailDir, thumbnailName)
+
+      const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer())
+      await writeFile(thumbnailFullPath, thumbnailBuffer)
+
+      thumbnailPath = `/uploads/thumbnails/${thumbnailName}`
+    }
+
+    // Upload resource file
+    if (resourceFile && resourceFile.size > 0) {
+      const resourceDir = join(process.cwd(), "public", "uploads", "resources")
+      await mkdir(resourceDir, { recursive: true })
+
+      const resourceExt = resourceFile.name.split(".").pop()
+      const resourceName = `${nanoid()}.${resourceExt}`
+      const resourceFullPath = join(resourceDir, resourceName)
+
+      const resourceBuffer = Buffer.from(await resourceFile.arrayBuffer())
+      await writeFile(resourceFullPath, resourceBuffer)
+
+      filePath = `/uploads/resources/${resourceName}`
+    }
+
+    // Generate slug
     const slug = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "")
 
-    // Handle file uploads
-    let thumbnailPath = null
-    let resourceFilePath = null
-
-    const thumbnailFile = formData.get("thumbnail") as File
-    const resourceFile = formData.get("resourceFile") as File
-
-    if (thumbnailFile && thumbnailFile.size > 0) {
-      const thumbnailId = nanoid()
-      const thumbnailExt = thumbnailFile.name.split(".").pop()
-      const thumbnailFileName = `${thumbnailId}.${thumbnailExt}`
-
-      await mkdir(join(process.cwd(), "public/uploads/thumbnails"), { recursive: true })
-      const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer())
-      await writeFile(join(process.cwd(), "public/uploads/thumbnails", thumbnailFileName), thumbnailBuffer)
-
-      thumbnailPath = `/uploads/thumbnails/${thumbnailFileName}`
-    }
-
-    if (resourceFile && resourceFile.size > 0) {
-      const fileId = nanoid()
-      const fileExt = resourceFile.name.split(".").pop()
-      const fileName = `${fileId}.${fileExt}`
-
-      await mkdir(join(process.cwd(), "public/uploads/resources"), { recursive: true })
-      const fileBuffer = Buffer.from(await resourceFile.arrayBuffer())
-      await writeFile(join(process.cwd(), "public/uploads/resources", fileName), fileBuffer)
-
-      resourceFilePath = `/uploads/resources/${fileName}`
-    }
-
+    // Create resource
     const resource = await prisma.resource.create({
       data: {
         title,
@@ -206,7 +213,7 @@ export async function createResource(prevState: any, formData: FormData) {
         featured,
         published,
         thumbnail: thumbnailPath,
-        filePath: resourceFilePath,
+        filePath,
         fileType: resourceFile?.type || null,
         authorId: user.id,
       },
@@ -241,16 +248,12 @@ export async function updateResource(resourceId: string, prevState: any, formDat
     const featured = formData.get("featured") === "on"
     const published = formData.get("published") === "on"
 
-    // Generate new slug if title changed
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "")
+    // Handle file uploads
+    const thumbnailFile = formData.get("thumbnail") as File
+    const resourceFile = formData.get("resourceFile") as File
 
-    // Handle file uploads (similar to create)
     const updateData: any = {
       title,
-      slug,
       description,
       longDescription: longDescription || null,
       category: category as any,
@@ -261,33 +264,42 @@ export async function updateResource(resourceId: string, prevState: any, formDat
       published,
     }
 
-    const thumbnailFile = formData.get("thumbnail") as File
-    const resourceFile = formData.get("resourceFile") as File
-
+    // Upload new thumbnail if provided
     if (thumbnailFile && thumbnailFile.size > 0) {
-      const thumbnailId = nanoid()
+      const thumbnailDir = join(process.cwd(), "public", "uploads", "thumbnails")
+      await mkdir(thumbnailDir, { recursive: true })
+
       const thumbnailExt = thumbnailFile.name.split(".").pop()
-      const thumbnailFileName = `${thumbnailId}.${thumbnailExt}`
+      const thumbnailName = `${nanoid()}.${thumbnailExt}`
+      const thumbnailFullPath = join(thumbnailDir, thumbnailName)
 
-      await mkdir(join(process.cwd(), "public/uploads/thumbnails"), { recursive: true })
       const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer())
-      await writeFile(join(process.cwd(), "public/uploads/thumbnails", thumbnailFileName), thumbnailBuffer)
+      await writeFile(thumbnailFullPath, thumbnailBuffer)
 
-      updateData.thumbnail = `/uploads/thumbnails/${thumbnailFileName}`
+      updateData.thumbnail = `/uploads/thumbnails/${thumbnailName}`
     }
 
+    // Upload new resource file if provided
     if (resourceFile && resourceFile.size > 0) {
-      const fileId = nanoid()
-      const fileExt = resourceFile.name.split(".").pop()
-      const fileName = `${fileId}.${fileExt}`
+      const resourceDir = join(process.cwd(), "public", "uploads", "resources")
+      await mkdir(resourceDir, { recursive: true })
 
-      await mkdir(join(process.cwd(), "public/uploads/resources"), { recursive: true })
-      const fileBuffer = Buffer.from(await resourceFile.arrayBuffer())
-      await writeFile(join(process.cwd(), "public/uploads/resources", fileName), fileBuffer)
+      const resourceExt = resourceFile.name.split(".").pop()
+      const resourceName = `${nanoid()}.${resourceExt}`
+      const resourceFullPath = join(resourceDir, resourceName)
 
-      updateData.filePath = `/uploads/resources/${fileName}`
+      const resourceBuffer = Buffer.from(await resourceFile.arrayBuffer())
+      await writeFile(resourceFullPath, resourceBuffer)
+
+      updateData.filePath = `/uploads/resources/${resourceName}`
       updateData.fileType = resourceFile.type
     }
+
+    // Update slug if title changed
+    updateData.slug = title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
 
     await prisma.resource.update({
       where: { id: resourceId },
@@ -331,26 +343,37 @@ export async function deleteResource(resourceId: string) {
   }
 }
 
-// Admin: Get resource for editing
-export async function getResourceForEdit(resourceId: string) {
+// Admin: Toggle resource status
+export async function toggleResourceStatus(resourceId: string, field: "published" | "featured") {
   try {
     await requireAdmin()
 
     const resource = await prisma.resource.findUnique({
       where: { id: resourceId },
-      include: {
-        author: {
-          select: {
-            firstName: true,
-            lastName: true,
-          },
-        },
+      select: { [field]: true },
+    })
+
+    if (!resource) {
+      return { success: false, error: "Resource not found" }
+    }
+
+    await prisma.resource.update({
+      where: { id: resourceId },
+      data: {
+        [field]: !resource[field],
       },
     })
 
-    return resource
+    revalidatePath("/admin/resources")
+    revalidatePath("/resources")
+    revalidatePath("/")
+
+    return { success: true }
   } catch (error) {
-    console.error("Failed to fetch resource for edit:", error)
-    return null
+    console.error("Failed to toggle resource status:", error)
+    return {
+      success: false,
+      error: "Failed to update resource status.",
+    }
   }
 }
