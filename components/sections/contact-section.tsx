@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Mail, Phone, MapPin, Calendar } from "lucide-react"
 import { AnimatedSection } from "@/components/ui/animated-section"
-import { submitContactForm } from "@/app/actions/contact"
-import type { ContactForm } from "@/lib/types"
+import { submitContactForm } from "@/app/actions/leads"
+import type { ContactFormData } from "@/lib/types"
 
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -17,7 +17,7 @@ export function ContactSection() {
   async function handleSubmit(formData: FormData) {
     setIsSubmitting(true)
 
-    const contactData: ContactForm = {
+    const contactData: ContactFormData = {
       name: formData.get("name") as string,
       email: formData.get("email") as string,
       company: formData.get("company") as string,
