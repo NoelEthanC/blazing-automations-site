@@ -1,251 +1,210 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Download, Play, FileText, PenToolIcon as Tool, ChevronRight, X } from "lucide-react"
-import Link from "next/link"
-import { AnimatedSection } from "@/components/ui/animated-section"
-import { recordResourceDownload } from "@/app/actions/resources"
-import type { ResourceWithAuthor } from "@/lib/types"
+import { Card, CardContent } from "@/components/ui/card"
+import { DownloadModal } from "./download-modal"
+import { Download, Calendar, User, ExternalLink } from "lucide-react"
+import { formatDistanceToNow } from "date-fns"
 
 interface ResourceDetailClientProps {
-  resource: ResourceWithAuthor
-  relatedResources: ResourceWithAuthor[]
+  resource: {
+    id: string
+    title: string
+    slug: string
+    description: string
+    longDescription: string | null
+    thumbnail: string | null
+    category: string
+    tool: string | null
+    hasGuide: boolean
+    guideUrl: string | null
+    downloadsCount: number
+    createdAt: Date
+    author: {
+      firstName: string | null
+      lastName: string | null
+      email: string
+    }
+    downloads: Array<{
+      id: string
+      createdAt: Date
+    }>
+  }
 }
 
-export function ResourceDetailClient({ resource, relatedResources }: ResourceDetailClientProps) {
+export function ResourceDetailClient({ resource }: ResourceDetailClientProps) {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false)
-  const [email, setEmail] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [downloadComplete, setDownloadComplete] = useState(false)
 
-  const handleDownload = async (action: "DOWNLOAD" | "EMAIL") => {
-    if (!email) return
-
-    setIsSubmitting(true)
-    try {
-      await recordResourceDownload({
-        email,
-        resourceId: resource.id,
-        action,
-      })
-      setDownloadComplete(true)
-    } catch (error) {
-      console.error("Download failed:", error)
-    } finally {
-      setIsSubmitting(false)
-    }
+  const categoryLabels = {
+    MAKE_TEMPLATES: "Make.com Templates",
+    ZAPIER_TEMPLATES: "Zapier Templates",
+    N8N_TEMPLATES: "n8n Templates",
+    AUTOMATION_GUIDES: "Automation Guides",
+    TOOLS_RESOURCES: "Tools & Resources",
   }
 
-  return (
-    <main className="min-h-screen bg-[#09111f] pt-16">
-      {/* Breadcrumb */}
-      <section className="py-6 bg-[#09111f] border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-2 text-sm">
-            <Link href="/resources" className="text-[#3f79ff] hover:text-[#3f79ff]/80">
-              Resources
-            </Link>
-            <ChevronRight className="h-4 w-4 text-gray-500" />
-            <span className="text-gray-400">{resource.title}</span>
-          </div>
-        </div>
-      </section>
+  const authorName =
+    resource.author.firstName && resource.author.lastName
+      ? `${resource.author.firstName} ${resource.author.lastName}`
+      : resource.author.email
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Main Content */}
-          <div className="lg:col-span-2">
-            <AnimatedSection>
-              {/* Resource Preview */}
-              <Card className="bg-gray-800/50 border-gray-700 overflow-hidden mb-8">
-                <CardContent className="p-0">
-                  <div className="relative aspect-video bg-gradient-to-br from-gray-700 to-gray-800">
-                    <img
-                      src={resource.thumbnail || "/placeholder.svg?height=400&width=600"}
-                      alt={resource.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge className="bg-[#ca6678] text-white font-medium">{resource.category}</Badge>
+  return (
+    <div className="min-h-screen bg-[#09111f] text-white">
+      <div className="container mx-auto px-4 py-12">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex flex-wrap items-center gap-2 mb-4">
+              <Badge variant="secondary" className="bg-[#3f79ff]/20 text-[#3f79ff]">
+                {categoryLabels[resource.category as keyof typeof categoryLabels]}
+              </Badge>
+              {resource.tool && (
+                <Badge variant="outline" className="border-gray-700 text-gray-300">
+                  {resource.tool}
+                </Badge>
+              )}
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              {resource.title}
+            </h1>
+
+            <p className="text-xl text-gray-300 mb-6">{resource.description}</p>
+
+            {/* Meta info */}
+            <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400 mb-8">
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                <span>By {authorName}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                <span>{formatDistanceToNow(new Date(resource.createdAt))} ago</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                <span>{resource.downloadsCount} downloads</span>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-4">
+              <Button
+                onClick={() => setIsDownloadModalOpen(true)}
+                size="lg"
+                className="bg-[#3f79ff] hover:bg-[#2563eb] text-white px-8"
+              >
+                <Download className="h-5 w-5 mr-2" />
+                Download Resource
+              </Button>
+
+              {resource.hasGuide && resource.guideUrl && (
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="border-gray-700 text-gray-300 hover:bg-gray-800 bg-transparent"
+                >
+                  <a href={resource.guideUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-5 w-5 mr-2" />
+                    View Guide
+                  </a>
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Thumbnail */}
+              {resource.thumbnail && (
+                <Card className="bg-gray-800/50 border-gray-700 overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="relative aspect-video">
+                      <Image
+                        src={resource.thumbnail || "/placeholder.svg"}
+                        alt={resource.title}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
-                    {resource.featured && (
-                      <div className="absolute top-4 right-4">
-                        <Badge className="bg-[#fcbf5b] text-[#09111f] font-medium">Featured</Badge>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Long description */}
+              {resource.longDescription && (
+                <Card className="bg-gray-800/50 border-gray-700">
+                  <CardContent className="p-6">
+                    <h2 className="text-2xl font-semibold mb-4">About This Resource</h2>
+                    <div className="prose prose-invert max-w-none">
+                      <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{resource.longDescription}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            {/* Sidebar */}
+            <div className="space-y-6">
+              <Card className="bg-gray-800/50 border-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold mb-4">Resource Details</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-gray-400 text-sm">Category</span>
+                      <p className="text-white">{categoryLabels[resource.category as keyof typeof categoryLabels]}</p>
+                    </div>
+                    {resource.tool && (
+                      <div>
+                        <span className="text-gray-400 text-sm">Tool</span>
+                        <p className="text-white">{resource.tool}</p>
                       </div>
                     )}
+                    <div>
+                      <span className="text-gray-400 text-sm">Downloads</span>
+                      <p className="text-white">{resource.downloadsCount}</p>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 text-sm">Published</span>
+                      <p className="text-white">{formatDistanceToNow(new Date(resource.createdAt))} ago</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Resource Details */}
-              <div className="mb-8">
-                <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">{resource.title}</h1>
-                <p className="text-xl text-gray-300 mb-6">{resource.description}</p>
-
-                <div className="flex items-center space-x-6 text-sm text-gray-400 mb-6">
-                  {resource.fileType && (
-                    <div className="flex items-center space-x-2">
-                      <FileText className="h-4 w-4" />
-                      <span>File Type: {resource.fileType}</span>
-                    </div>
-                  )}
-                  {resource.tool && (
-                    <div className="flex items-center space-x-2">
-                      <Tool className="h-4 w-4" />
-                      <span>Tool: {resource.tool}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center space-x-2">
-                    <Download className="h-4 w-4" />
-                    <span>Downloads: {resource.downloadsCount}</span>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 mb-8">
-                  <Dialog open={isDownloadModalOpen} onOpenChange={setIsDownloadModalOpen}>
-                    <DialogTrigger asChild>
-                      <Button size="lg" className="bg-[#3f79ff] hover:bg-[#3f79ff]/80 text-white">
-                        <Download className="h-5 w-5 mr-2" />
-                        Download Template
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="bg-gray-800 border-gray-700 text-white">
-                      <DialogHeader>
-                        <DialogTitle className="text-xl font-semibold">Get Your Free Template</DialogTitle>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute right-4 top-4 text-gray-400 hover:text-white"
-                          onClick={() => setIsDownloadModalOpen(false)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </DialogHeader>
-
-                      {downloadComplete ? (
-                        <div className="text-center py-8">
-                          <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Download className="h-8 w-8 text-green-500" />
-                          </div>
-                          <h3 className="text-xl font-semibold text-white mb-2">Download Ready!</h3>
-                          <p className="text-gray-400 mb-4">Check your email for the download link.</p>
-                          <Button
-                            onClick={() => setIsDownloadModalOpen(false)}
-                            className="bg-[#3f79ff] hover:bg-[#3f79ff]/80"
-                          >
-                            Close
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="space-y-6">
-                          <div>
-                            <h3 className="text-lg font-semibold text-white mb-2">{resource.title}</h3>
-                            <p className="text-gray-400">Enter your email address to download this template.</p>
-                          </div>
-
-                          <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                              Email Address
-                            </label>
-                            <Input
-                              id="email"
-                              type="email"
-                              value={email}
-                              onChange={(e) => setEmail(e.target.value)}
-                              placeholder="Enter your email address"
-                              className="bg-gray-700 border-gray-600 text-white"
-                              required
-                            />
-                          </div>
-
-                          <div className="flex flex-col gap-3">
-                            <Button
-                              onClick={() => handleDownload("DOWNLOAD")}
-                              disabled={!email || isSubmitting}
-                              className="bg-[#3f79ff] hover:bg-[#3f79ff]/80 text-white"
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              {isSubmitting ? "Processing..." : "Download Now"}
-                            </Button>
-
-                            <Button
-                              onClick={() => handleDownload("EMAIL")}
-                              disabled={!email || isSubmitting}
-                              variant="outline"
-                              className="border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
-                            >
-                              📧 Send to Email
-                            </Button>
-                          </div>
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-
-                  {resource.hasGuide && resource.guideUrl && (
-                    <Button
-                      asChild
-                      size="lg"
-                      variant="outline"
-                      className="border-[#3f79ff] text-[#3f79ff] hover:bg-[#3f79ff] hover:text-white bg-transparent"
-                    >
-                      <a href={resource.guideUrl} target="_blank" rel="noopener noreferrer">
-                        <Play className="h-5 w-5 mr-2" />
-                        Watch the Setup Guide
-                      </a>
-                    </Button>
-                  )}
-                </div>
-
-                {/* Long Description */}
-                {resource.longDescription && (
-                  <div className="prose prose-invert max-w-none">
-                    <div className="text-gray-300 leading-relaxed whitespace-pre-line">{resource.longDescription}</div>
-                  </div>
-                )}
-              </div>
-            </AnimatedSection>
-          </div>
-
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <AnimatedSection>
-              <Card className="bg-gray-800/50 border-gray-700 mb-8">
-                <CardContent className="p-6">
-                  <h3 className="text-xl font-semibold text-white mb-6">More Templates You'll Love</h3>
-                  <div className="space-y-4">
-                    {relatedResources.map((related) => (
-                      <Link
-                        key={related.id}
-                        href={`/resources/${related.slug}`}
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors group"
-                      >
-                        <img
-                          src={related.thumbnail || "/placeholder.svg?height=48&width=48"}
-                          alt={related.title}
-                          className="w-12 h-12 object-cover rounded"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-white font-medium group-hover:text-[#3f79ff] transition-colors truncate">
-                            {related.title}
-                          </h4>
-                          <p className="text-gray-400 text-sm">{related.category}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
+              {/* Download CTA */}
+              <Card className="bg-gradient-to-br from-[#3f79ff]/20 to-[#1e40af]/20 border-[#3f79ff]/30">
+                <CardContent className="p-6 text-center">
+                  <h3 className="text-lg font-semibold mb-2">Ready to Download?</h3>
+                  <p className="text-gray-300 text-sm mb-4">
+                    Get instant access to this resource and start automating today.
+                  </p>
+                  <Button
+                    onClick={() => setIsDownloadModalOpen(true)}
+                    className="w-full bg-[#3f79ff] hover:bg-[#2563eb] text-white"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Download Now
+                  </Button>
                 </CardContent>
               </Card>
-            </AnimatedSection>
+            </div>
           </div>
         </div>
       </div>
-    </main>
+
+      <DownloadModal
+        isOpen={isDownloadModalOpen}
+        onClose={() => setIsDownloadModalOpen(false)}
+        resourceTitle={resource.title}
+        resourceSlug={resource.slug}
+      />
+    </div>
   )
 }

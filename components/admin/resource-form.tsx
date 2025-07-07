@@ -1,57 +1,70 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useActionState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Switch } from "@/components/ui/switch"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Upload, X } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
+import { FileUploadPreview } from "./file-upload-preview"
+import { Loader2, Save, CheckCircle, AlertCircle } from "lucide-react"
 import { createResource, updateResource } from "@/app/actions/resources"
-import type { ResourceWithAuthor } from "@/lib/types"
 
 interface ResourceFormProps {
-  resource?: ResourceWithAuthor
+  resource?: {
+    id: string
+    title: string
+    slug: string
+    description: string
+    longDescription: string | null
+    category: string
+    tool: string | null
+    hasGuide: boolean
+    guideUrl: string | null
+    featured: boolean
+    published: boolean
+    thumbnail: string | null
+    filePath: string | null
+  }
   isEditing?: boolean
 }
 
 export function ResourceForm({ resource, isEditing = false }: ResourceFormProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(resource?.thumbnail || null)
+  const [state, formAction, isPending] = useActionState(
+    isEditing ? updateResource.bind(null, resource!.id) : createResource,
+    null,
+  )
 
-  const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        setThumbnailPreview(e.target?.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
-
-  const handleSubmit = async (formData: FormData) => {
-    setIsSubmitting(true)
-    try {
-      if (isEditing && resource) {
-        await updateResource(resource.id, formData)
-      } else {
-        await createResource(formData)
-      }
-    } catch (error) {
-      console.error("Failed to save resource:", error)
-      alert("Failed to save resource. Please try again.")
-    } finally {
-      setIsSubmitting(false)
-    }
-  }
+  const categories = [
+    { value: "MAKE_TEMPLATES", label: "Make.com Templates" },
+    { value: "ZAPIER_TEMPLATES", label: "Zapier Templates" },
+    { value: "N8N_TEMPLATES", label: "n8n Templates" },
+    { value: "AUTOMATION_GUIDES", label: "Automation Guides" },
+    { value: "TOOLS_RESOURCES", label: "Tools & Resources" },
+  ]
 
   return (
-    <form action={handleSubmit} className="space-y-8">
+    <form action={formAction} className="space-y-8">
+      {state?.success && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-green-400">
+            <CheckCircle className="h-5 w-5" />
+            <span>Resource {isEditing ? "updated" : "created"} successfully!</span>
+          </div>
+        </div>
+      )}
+
+      {state?.error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+          <div className="flex items-center gap-2 text-red-400">
+            <AlertCircle className="h-5 w-5" />
+            <span>{state.error}</span>
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
@@ -67,10 +80,10 @@ export function ResourceForm({ resource, isEditing = false }: ResourceFormProps)
                 <Input
                   id="title"
                   name="title"
+                  placeholder="Amazing Automation Template"
+                  className="bg-gray-900 border-gray-700 text-white"
                   defaultValue={resource?.title}
                   required
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Enter resource title"
                 />
               </div>
 
@@ -81,25 +94,25 @@ export function ResourceForm({ resource, isEditing = false }: ResourceFormProps)
                 <Textarea
                   id="description"
                   name="description"
+                  placeholder="Brief description of what this resource does..."
+                  className="bg-gray-900 border-gray-700 text-white"
+                  rows={3}
                   defaultValue={resource?.description}
                   required
-                  rows={3}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Brief description for resource cards"
                 />
               </div>
 
               <div>
                 <Label htmlFor="longDescription" className="text-gray-300">
-                  Long Description
+                  Detailed Description
                 </Label>
                 <Textarea
                   id="longDescription"
                   name="longDescription"
-                  defaultValue={resource?.longDescription || ""}
+                  placeholder="Detailed explanation, features, benefits, and usage instructions..."
+                  className="bg-gray-900 border-gray-700 text-white"
                   rows={6}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="Detailed description for resource detail page"
+                  defaultValue={resource?.longDescription || ""}
                 />
               </div>
             </CardContent>
@@ -107,138 +120,18 @@ export function ResourceForm({ resource, isEditing = false }: ResourceFormProps)
 
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">Resource Details</CardTitle>
+              <CardTitle className="text-white">Files & Media</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category" className="text-gray-300">
-                    Category *
-                  </Label>
-                  <Select name="category" defaultValue={resource?.category || "TEMPLATE"}>
-                    <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-gray-800 border-gray-700">
-                      <SelectItem value="TEMPLATE">Template</SelectItem>
-                      <SelectItem value="GUIDE">Guide</SelectItem>
-                      <SelectItem value="TOOL">Tool</SelectItem>
-                      <SelectItem value="EBOOK">eBook</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+            <CardContent className="space-y-6">
+              <FileUploadPreview name="thumbnail" label="Thumbnail Image" accept="image/*" maxSize={5} preview={true} />
 
-                <div>
-                  <Label htmlFor="tool" className="text-gray-300">
-                    Tool/Platform
-                  </Label>
-                  <Input
-                    id="tool"
-                    name="tool"
-                    defaultValue={resource?.tool || ""}
-                    className="bg-gray-700 border-gray-600 text-white"
-                    placeholder="e.g., Make.com, Zapier"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="guideUrl" className="text-gray-300">
-                  Setup Guide URL
-                </Label>
-                <Input
-                  id="guideUrl"
-                  name="guideUrl"
-                  type="url"
-                  defaultValue={resource?.guideUrl || ""}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  placeholder="https://youtube.com/watch?v=..."
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="text-white">File Uploads</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="thumbnail" className="text-gray-300">
-                  Thumbnail Image
-                </Label>
-                <div className="mt-2">
-                  {thumbnailPreview && (
-                    <div className="relative mb-4">
-                      <img
-                        src={thumbnailPreview || "/placeholder.svg"}
-                        alt="Thumbnail preview"
-                        className="w-full max-w-sm h-32 object-cover rounded-lg"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-2 right-2 bg-black/50 hover:bg-black/70"
-                        onClick={() => setThumbnailPreview(null)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-center w-full">
-                    <label
-                      htmlFor="thumbnail"
-                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600"
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-4 text-gray-400" />
-                        <p className="mb-2 text-sm text-gray-400">
-                          <span className="font-semibold">Click to upload</span> thumbnail
-                        </p>
-                        <p className="text-xs text-gray-500">PNG, JPG or WebP (MAX. 5MB)</p>
-                      </div>
-                      <input
-                        id="thumbnail"
-                        name="thumbnail"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handleThumbnailChange}
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="resourceFile" className="text-gray-300">
-                  Resource File
-                </Label>
-                <div className="mt-2">
-                  <div className="flex items-center justify-center w-full">
-                    <label
-                      htmlFor="resourceFile"
-                      className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-600 border-dashed rounded-lg cursor-pointer bg-gray-700 hover:bg-gray-600"
-                    >
-                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Upload className="w-8 h-8 mb-4 text-gray-400" />
-                        <p className="mb-2 text-sm text-gray-400">
-                          <span className="font-semibold">Click to upload</span> resource file
-                        </p>
-                        <p className="text-xs text-gray-500">JSON, ZIP or PDF (MAX. 50MB)</p>
-                      </div>
-                      <input
-                        id="resourceFile"
-                        name="resourceFile"
-                        type="file"
-                        accept=".json,.zip,.pdf,application/json,application/zip,application/pdf"
-                        className="hidden"
-                      />
-                    </label>
-                  </div>
-                </div>
-              </div>
+              <FileUploadPreview
+                name="resourceFile"
+                label="Resource File"
+                accept=".json,.zip,.pdf,.docx"
+                maxSize={50}
+                required={!isEditing}
+              />
             </CardContent>
           </Card>
         </div>
@@ -247,51 +140,91 @@ export function ResourceForm({ resource, isEditing = false }: ResourceFormProps)
         <div className="space-y-6">
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">Publishing Options</CardTitle>
+              <CardTitle className="text-white">Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="published" className="text-gray-300">
-                  Published
+              <div>
+                <Label htmlFor="category" className="text-gray-300">
+                  Category *
                 </Label>
-                <Switch id="published" name="published" defaultChecked={resource?.published ?? true} />
+                <Select name="category" defaultValue={resource?.category} required>
+                  <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-900 border-gray-700">
+                    {categories.map((category) => (
+                      <SelectItem key={category.value} value={category.value}>
+                        {category.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="tool" className="text-gray-300">
+                  Tool/Platform
+                </Label>
+                <Input
+                  id="tool"
+                  name="tool"
+                  placeholder="Make.com, Zapier, n8n, etc."
+                  className="bg-gray-900 border-gray-700 text-white"
+                  defaultValue={resource?.tool || ""}
+                />
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="featured" className="text-gray-300">
-                  Featured
-                </Label>
-                <Switch id="featured" name="featured" defaultChecked={resource?.featured ?? false} />
+                <div className="space-y-0.5">
+                  <Label className="text-gray-300">Featured</Label>
+                  <p className="text-sm text-gray-500">Show on homepage</p>
+                </div>
+                <Switch name="featured" defaultChecked={resource?.featured} />
               </div>
 
               <div className="flex items-center justify-between">
-                <Label htmlFor="hasGuide" className="text-gray-300">
-                  Has Setup Guide
-                </Label>
-                <Switch id="hasGuide" name="hasGuide" defaultChecked={resource?.hasGuide ?? false} />
+                <div className="space-y-0.5">
+                  <Label className="text-gray-300">Published</Label>
+                  <p className="text-sm text-gray-500">Make visible to users</p>
+                </div>
+                <Switch name="published" defaultChecked={resource?.published ?? true} />
               </div>
             </CardContent>
           </Card>
 
           <Card className="bg-gray-800/50 border-gray-700">
             <CardHeader>
-              <CardTitle className="text-white">Actions</CardTitle>
+              <CardTitle className="text-white">Guide & Documentation</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Button type="submit" disabled={isSubmitting} className="w-full bg-[#3f79ff] hover:bg-[#3f79ff]/80">
-                {isSubmitting ? "Saving..." : isEditing ? "Update Resource" : "Create Resource"}
-              </Button>
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <Label className="text-gray-300">Has Guide</Label>
+                  <p className="text-sm text-gray-500">Include setup guide</p>
+                </div>
+                <Switch name="hasGuide" defaultChecked={resource?.hasGuide} />
+              </div>
 
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
-                onClick={() => window.history.back()}
-              >
-                Cancel
-              </Button>
+              <div>
+                <Label htmlFor="guideUrl" className="text-gray-300">
+                  Guide URL
+                </Label>
+                <Input
+                  id="guideUrl"
+                  name="guideUrl"
+                  type="url"
+                  placeholder="https://docs.example.com/guide"
+                  className="bg-gray-900 border-gray-700 text-white"
+                  defaultValue={resource?.guideUrl || ""}
+                />
+              </div>
             </CardContent>
           </Card>
+
+          <Button type="submit" disabled={isPending} className="w-full bg-[#3f79ff] hover:bg-[#2563eb] text-white">
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+            {isEditing ? "Update Resource" : "Create Resource"}
+          </Button>
         </div>
       </div>
     </form>

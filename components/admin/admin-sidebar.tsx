@@ -1,107 +1,66 @@
 "use client"
 
-import { UserButton } from "@clerk/nextjs"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { LayoutDashboard, FileText, Users, Settings, Home, Zap } from "lucide-react"
+import { usePathname } from "next/navigation"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
+import { LayoutDashboard, FileText, Users, Settings, Edit3, Zap } from "lucide-react"
 
-const menuItems = [
-  {
-    title: "Dashboard",
-    url: "/admin",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Content Management",
-    url: "/admin/content",
-    icon: FileText,
-  },
-  {
-    title: "Resources",
-    url: "/admin/resources",
-    icon: FileText,
-  },
-  {
-    title: "Leads",
-    url: "/admin/leads",
-    icon: Users,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings",
-    icon: Settings,
-  },
+const navigation = [
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Resources", href: "/admin/resources", icon: FileText },
+  { name: "Content Management", href: "/admin/content", icon: Edit3 },
+  { name: "Leads", href: "/admin/leads", icon: Users },
+  { name: "Settings", href: "/admin/settings", icon: Settings },
 ]
 
-export function AdminSidebar() {
+interface AdminSidebarProps {
+  onNavigate?: () => void
+}
+
+export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
+  const pathname = usePathname()
+
   return (
-    <Sidebar className="border-r border-gray-800">
-      <SidebarHeader className="border-b border-gray-800 p-4">
-        <Link href="/" className="flex items-center space-x-2">
-          <Zap className="h-6 w-6 text-[#3f79ff]" />
+    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 border-r border-gray-800">
+      <div className="flex h-16 shrink-0 items-center">
+        <Link href="/admin" className="flex items-center gap-2">
+          <Zap className="h-8 w-8 text-[#3f79ff]" />
           <span className="text-xl font-bold text-white">Admin Panel</span>
         </Link>
-      </SidebarHeader>
+      </div>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-400">Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild className="text-gray-300 hover:text-white hover:bg-gray-800">
-                    <Link href={item.url}>
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
+      <nav className="flex flex-1 flex-col">
+        <ul role="list" className="flex flex-1 flex-col gap-y-7">
+          <li>
+            <ul role="list" className="-mx-2 space-y-1">
+              {navigation.map((item) => {
+                const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href))
+
+                return (
+                  <li key={item.name}>
+                    <Link
+                      href={item.href}
+                      onClick={onNavigate}
+                      className={cn(
+                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors",
+                        isActive ? "bg-[#3f79ff] text-white" : "text-gray-300 hover:text-white hover:bg-gray-800",
+                      )}
+                    >
+                      <item.icon
+                        className={cn(
+                          "h-6 w-6 shrink-0",
+                          isActive ? "text-white" : "text-gray-400 group-hover:text-white",
+                        )}
+                      />
+                      {item.name}
                     </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-gray-400">Quick Actions</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild className="text-gray-300 hover:text-white hover:bg-gray-800">
-                  <Link href="/" target="_blank">
-                    <Home className="h-4 w-4" />
-                    <span>View Site</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter className="border-t border-gray-800 p-4">
-        <div className="flex items-center space-x-3">
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: "w-8 h-8",
-              },
-            }}
-          />
-          <span className="text-sm text-gray-300">Admin User</span>
-        </div>
-      </SidebarFooter>
-    </Sidebar>
+                  </li>
+                )
+              })}
+            </ul>
+          </li>
+        </ul>
+      </nav>
+    </div>
   )
 }

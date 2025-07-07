@@ -1,18 +1,10 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server"
-import { syncClerkUser } from "@/lib/auth"
 
 const isProtectedRoute = createRouteMatcher(["/admin(.*)"])
 
 export default clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
     await auth.protect()
-
-    // Sync Clerk user with database on protected route access
-    try {
-      await syncClerkUser()
-    } catch (error) {
-      console.error("Failed to sync user:", error)
-    }
   }
 })
 
