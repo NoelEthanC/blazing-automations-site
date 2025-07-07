@@ -4,6 +4,37 @@ import { prisma } from "@/lib/prisma"
 import { requireAdmin } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
 
+// Get site content by key
+export async function getSiteContent(key: string) {
+  try {
+    const content = await prisma.siteContent.findUnique({
+      where: { key },
+    })
+
+    return content
+  } catch (error) {
+    console.error(`Failed to fetch site content for ${key}:`, error)
+    return null
+  }
+}
+
+// Get all site content
+export async function getAllSiteContent() {
+  try {
+    const content = await prisma.siteContent.findMany({
+      orderBy: {
+        key: "asc",
+      },
+    })
+
+    return content
+  } catch (error) {
+    console.error("Failed to fetch all site content:", error)
+    return []
+  }
+}
+
+// Update site content
 export async function updateSiteContentAction(prevState: any, formData: FormData) {
   try {
     await requireAdmin()

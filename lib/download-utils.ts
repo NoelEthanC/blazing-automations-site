@@ -1,48 +1,50 @@
-import crypto from "crypto"
-
-const DOWNLOAD_SECRET = process.env.DOWNLOAD_SECRET || "your-secret-key"
-
-export function generateDownloadToken(resourceId: string, email: string): string {
-  const payload = {
-    resourceId,
-    email,
-    timestamp: Date.now(),
-    expiresAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-  }
-
-  const payloadString = JSON.stringify(payload)
-  const signature = crypto.createHmac("sha256", DOWNLOAD_SECRET).update(payloadString).digest("hex")
-
-  return Buffer.from(JSON.stringify({ payload, signature })).toString("base64url")
-}
-
-export function verifyDownloadToken(token: string): { resourceId: string; email: string } | null {
-  try {
-    const decoded = JSON.parse(Buffer.from(token, "base64url").toString())
-    const { payload, signature } = decoded
-
-    // Verify signature
-    const expectedSignature = crypto.createHmac("sha256", DOWNLOAD_SECRET).update(JSON.stringify(payload)).digest("hex")
-
-    if (signature !== expectedSignature) {
-      return null
-    }
-
-    // Check expiration
-    if (Date.now() > payload.expiresAt) {
-      return null
-    }
-
-    return {
-      resourceId: payload.resourceId,
-      email: payload.email,
-    }
-  } catch (error) {
-    return null
-  }
-}
+import { createHash } from "crypto"
 
 export function validateEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return emailRegex.test(email)
+}
+
+export function generateDownloadToken(resourceId: string, email: string): string {
+  const timestamp = Date.now().toString()
+  const data = `${resourceId}:${email}:${timestamp}`
+  const secret = process.env.DOWNLOAD_SECRET || "default-secret-change-in-production"
+
+  const hash = createHash("sha256")
+    .update(data + secret)
+    .digest("hex")
+
+  return Buffer.from(`${data}:${hash}`).toString("base64url")
+}
+
+export function verifyDownloadToken(token: string): { resourceId: string; email: string } | null {
+  try {
+    const decoded = Buffer.from(token, "base64url").toString()
+    const [resourceId, email, timestamp, hash] = decoded.split(":")
+
+    // Check if token is expired (24 hours)
+    const tokenTime = Number.parseInt(timestamp)
+    const now = Date.now()
+    const twentyFourHours = 24 * 60 * 60 * 1000
+
+    if (now - tokenTime > twentyFourHours) {
+      return null
+    }
+
+    // Verify hash
+    const data = `${resourceId}:${email}:${timestamp}`
+    const secret = process.env.DOWNLOAD_SECRET || "default-secret-change-in-production"
+
+    const expectedHash = createHash("sha256")
+      .update(data + secret)
+      .digest("hex")
+
+    if (hash !== expectedHash) {
+      return null
+    }
+
+    return { resourceId, email }
+  } catch (error) {
+    return null
+  }
 }

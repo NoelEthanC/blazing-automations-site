@@ -1,39 +1,70 @@
-import { auth } from "@clerk/nextjs/server"
+import { auth, currentUser } from "@clerk/nextjs/server"
 import { prisma } from "./prisma"
+import { redirect } from "next/navigation"
 
-export async function requireAdmin() {
+export async function requireAuth() {
   const { userId } = await auth()
 
   if (!userId) {
-    throw new Error("Unauthorized")
+    redirect("/sign-in")
   }
 
-  // Sync user with database if not exists
+  return userId
+}
+
+export async function requireAdmin() {
+  const clerkUser = await currentUser()
+
+  if (!clerkUser) {
+    redirect("/sign-in")
+  }
+
+  // Sync user with database
   const user = await prisma.user.upsert({
-    where: { clerkId: userId },
-    update: {},
+    where: { clerkId: clerkUser.id },
+    update: {
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      firstName: clerkUser.firstName,
+      lastName: clerkUser.lastName,
+    },
     create: {
-      clerkId: userId,
-      email: "admin@blazingautomations.com", // This should come from Clerk
-      role: "ADMIN",
+      clerkId: clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      firstName: clerkUser.firstName,
+      lastName: clerkUser.lastName,
+      role: "USER", // Default role, manually promote to ADMIN in database
     },
   })
 
   if (user.role !== "ADMIN") {
-    throw new Error("Admin access required")
+    redirect("/")
   }
 
   return user
 }
 
 export async function getCurrentUser() {
-  const { userId } = await auth()
+  const clerkUser = await currentUser()
 
-  if (!userId) {
+  if (!clerkUser) {
     return null
   }
 
-  return await prisma.user.findUnique({
-    where: { clerkId: userId },
+  const user = await prisma.user.upsert({
+    where: { clerkId: clerkUser.id },
+    update: {
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      firstName: clerkUser.firstName,
+      lastName: clerkUser.lastName,
+    },
+    create: {
+      clerkId: clerkUser.id,
+      email: clerkUser.emailAddresses[0]?.emailAddress || "",
+      firstName: clerkUser.firstName,
+      lastName: clerkUser.lastName,
+      role: "USER",
+    },
   })
+
+  return user
 }
