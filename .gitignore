@@ -1,0 +1,40 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files
+.env*
+
+
+# dev uploads
+/uploads
+/public/uploads/*
+public/uploads/*
+# vercel
+.vercel
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+<<<<<<< HEAD
+# clerk configuration (can include secrets)
+/.clerk/
+
+
+# clerk configuration (can include secrets)
+/.clerk/
+=======
+>>>>>>> 35b07f174db01c5a71affe1bcd0380b11c8a0fba

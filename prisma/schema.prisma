@@ -1,0 +1,149 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String   @unique
+  firstName String?
+  lastName  String?
+  role      UserRole @default(USER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  resources          Resource[]
+  contactSubmissions ContactSubmission[]
+
+  @@map("users")
+}
+
+model Resource {
+  id              String           @id @default(cuid())
+  title           String
+  slug            String           @unique
+  description     String           @db.Text
+  longDescription String?          @db.Text
+  thumbnail       String?
+  filePath        String?
+  fileType        String?
+  tool            String?
+  category        ResourceCategory
+  hasGuide        Boolean          @default(false)
+  guideUrl        String?
+  featured        Boolean          @default(false)
+  published       Boolean          @default(false)
+  downloadsCount  Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  // Relations
+  authorId  String
+  author    User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  downloads ResourceDownload[]
+
+  @@map("resources")
+}
+
+model ResourceDownload {
+  id        String                 @id @default(cuid())
+  email     String
+  action    ResourceDownloadAction
+  createdAt DateTime               @default(now())
+  expiresAt DateTime?              @default(dbgenerated("DATE_ADD(NOW(), INTERVAL 1 DAY)"))
+  token     String                 @unique
+
+  // Relations
+  resourceId String
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@map("resource_downloads")
+}
+
+model ContactSubmission {
+  id        String        @id @default(cuid())
+  name      String
+  email     String
+  company   String?
+  message   String        @db.Text
+  status    ContactStatus @default(NEW)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  // Relations
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@map("contact_submissions")
+}
+
+model WatchUsBuildVideo {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  videoUrl    String
+  thumbnail   String?
+  featured    Boolean  @default(false)
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("watch_us_build_videos")
+}
+
+model SiteContent {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  title     String?
+  content   String   @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_content")
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  type      String   @default("string")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ResourceCategory {
+  MAKE_TEMPLATES
+  ZAPIER_TEMPLATES
+  N8N_TEMPLATES
+  AUTOMATION_GUIDES
+  TOOLS_RESOURCES
+  TEMPLATE
+  GUIDE
+  TOOL
+}
+
+enum ResourceDownloadAction {
+  DOWNLOAD
+  EMAIL
+}
+
+enum ContactStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
