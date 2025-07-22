@@ -7,7 +7,7 @@ CREATE TABLE `users` (
     `lastName` VARCHAR(191) NULL,
     `role` ENUM('USER', 'ADMIN') NOT NULL DEFAULT 'USER',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `updatedAt` DATETIME(3) NOT NULL,
+    `updatedAt` DATETIME(3)  NULL,
 
     UNIQUE INDEX `users_clerkId_key`(`clerkId`),
     UNIQUE INDEX `users_email_key`(`email`),
@@ -45,7 +45,7 @@ CREATE TABLE `resource_downloads` (
     `email` VARCHAR(191) NOT NULL,
     `action` ENUM('DOWNLOAD', 'EMAIL') NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `expiresAt` DATETIME(3) NULL DEFAULT DATE_ADD(NOW(), INTERVAL 1 DAY),
+    `expiresAt` DATETIME NULL,
     `token` VARCHAR(191) NOT NULL,
     `resourceId` VARCHAR(191) NOT NULL,
 
