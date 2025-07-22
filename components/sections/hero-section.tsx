@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, PlayCircle, Star } from "lucide-react";
 import gsap from "gsap";
 import { cn, handleLinkClick } from "@/lib/utils";
+import { ArrowRight, PlayCircle, Star, ArrowDown } from "lucide-react";
 
 const HeroSection = () => {
   const heroRef = useRef<HTMLDivElement>(null);
@@ -283,6 +283,20 @@ const HeroSection = () => {
         {/* Optional: Marquee animation */}
         {/* <ToolsMarquee /> */}
       </div>
+      {/* Scroll Down Arrow Button */}
+      <button
+        // onClick={() => {
+        //   const nextSection = document.getElementById("services");
+        //   nextSection?.scrollIntoView({ behavior: "smooth" });
+        // }}
+        onClick={() => handleLinkClick("#tools")}
+        className="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-40 group"
+        aria-label="Scroll down"
+      >
+        <div className="animate-bounce">
+          <ArrowDown className="w-7 h-7 text-sunray group-hover:text-light-blue transition-colors duration-300" />
+        </div>
+      </button>
     </section>
   );
 };

@@ -7,6 +7,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { nanoid } from "nanoid";
 import { ResourceCategory } from "@prisma/client";
+import { supabase } from "@/lib/supabase";
 
 // Fetch all published resources
 export async function getPublishedResources() {
@@ -284,6 +285,25 @@ export async function getAllResources() {
   }
 }
 
+async function uploadFile(file: File, bucket: string, pathPrefix = "") {
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${pathPrefix}-${Date.now()}.${fileExt}`;
+
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) throw error;
+
+  const { data: urlData } = supabase.storage
+    .from(bucket)
+    .getPublicUrl(fileName);
+  return urlData.publicUrl;
+}
+
 // Admin: Create new resource
 export async function createResource(prevState: any, formData: FormData) {
   try {
@@ -309,22 +329,23 @@ export async function createResource(prevState: any, formData: FormData) {
 
     // Upload thumbnail
     if (thumbnailFile && thumbnailFile.size > 0) {
-      const thumbnailDir = join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "thumbnails"
-      );
-      await mkdir(thumbnailDir, { recursive: true });
+      // const thumbnailDir = join(
+      //   process.cwd(),
+      //   "public",
+      //   "uploads",
+      //   "thumbnails"
+      // );
+      // await mkdir(thumbnailDir, { recursive: true });
 
-      const thumbnailExt = thumbnailFile.name.split(".").pop();
-      const thumbnailName = `${nanoid()}.${thumbnailExt}`;
-      const thumbnailFullPath = join(thumbnailDir, thumbnailName);
+      // const thumbnailExt = thumbnailFile.name.split(".").pop();
+      // const thumbnailName = `${nanoid()}.${thumbnailExt}`;
+      // const thumbnailFullPath = join(thumbnailDir, thumbnailName);
 
-      const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
-      await writeFile(thumbnailFullPath, thumbnailBuffer);
+      // const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
+      // await writeFile(thumbnailFullPath, thumbnailBuffer);
 
-      thumbnailPath = `/uploads/thumbnails/${thumbnailName}`;
+      // thumbnailPath = `/uploads/thumbnails/${thumbnailName}`;
+      thumbnailPath = await uploadFile(thumbnailFile, "thumbnails", "thumb");
     }
 
     // Upload resource file
@@ -419,22 +440,27 @@ export async function updateResource(
 
     // Upload new thumbnail if provided
     if (thumbnailFile && thumbnailFile.size > 0) {
-      const thumbnailDir = join(
-        process.cwd(),
-        "public",
-        "uploads",
-        "thumbnails"
+      // const thumbnailDir = join(
+      //   process.cwd(),
+      //   "public",
+      //   "uploads",
+      //   "thumbnails"
+      // );
+      // await mkdir(thumbnailDir, { recursive: true });
+
+      // const thumbnailExt = thumbnailFile.name.split(".").pop();
+      // const thumbnailName = `${nanoid()}.${thumbnailExt}`;
+      // const thumbnailFullPath = join(thumbnailDir, thumbnailName);
+
+      // const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
+      // await writeFile(thumbnailFullPath, thumbnailBuffer);
+
+      const thumbnailPath = await uploadFile(
+        thumbnailFile,
+        "thumbnails",
+        "thumb"
       );
-      await mkdir(thumbnailDir, { recursive: true });
-
-      const thumbnailExt = thumbnailFile.name.split(".").pop();
-      const thumbnailName = `${nanoid()}.${thumbnailExt}`;
-      const thumbnailFullPath = join(thumbnailDir, thumbnailName);
-
-      const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
-      await writeFile(thumbnailFullPath, thumbnailBuffer);
-
-      updateData.thumbnail = `/uploads/thumbnails/${thumbnailName}`;
+      updateData.thumbnail = thumbnailPath;
     }
 
     // Upload new resource file if provided

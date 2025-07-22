@@ -1,11 +1,11 @@
-import { notFound } from "next/navigation"
-import { prisma } from "@/lib/prisma"
-import { ResourceForm } from "@/components/admin/resource-form"
+import { notFound } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import { ResourceForm } from "@/components/admin/resource-form";
 
 interface EditResourcePageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
 async function getResource(id: string) {
@@ -20,20 +20,23 @@ async function getResource(id: string) {
           },
         },
       },
-    })
+    });
 
-    return resource
+    return resource;
   } catch (error) {
-    console.error("Failed to fetch resource:", error)
-    return null
+    console.error("Failed to fetch resource:", error);
+    return null;
   }
 }
 
-export default async function EditResourcePage({ params }: EditResourcePageProps) {
-  const resource = await getResource(params.id)
+export default async function EditResourcePage({
+  params,
+}: EditResourcePageProps) {
+  const { id } = await params;
+  const resource = await getResource(id);
 
   if (!resource) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -45,5 +48,5 @@ export default async function EditResourcePage({ params }: EditResourcePageProps
 
       <ResourceForm resource={resource} isEditing={true} />
     </div>
-  )
+  );
 }

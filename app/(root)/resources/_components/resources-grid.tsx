@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Download, Play } from "lucide-react";
 import { Resource } from "@prisma/client";
+import Image from "next/image";
 
 export function ResourcesGrid({
   resources,
@@ -30,10 +31,12 @@ export function ResourcesGrid({
           >
             <CardContent className="p-0">
               <div className="relative aspect-video bg-gradient-to-br from-gray-700 to-gray-800">
-                <img
+                <Image
                   src={resource.thumbnail || "/placeholder.svg"}
                   alt={resource.title}
                   className="w-full h-full object-cover"
+                  width={400}
+                  height={300}
                 />
                 <div className="absolute top-3 left-3">
                   <Badge className="bg-[#ca6678] text-white">

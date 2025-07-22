@@ -1,43 +1,39 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+"use client";
 
 export default function ResourcesLoading() {
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="container mx-auto px-4 py-36">
-        {/* Header Skeleton */}
-        <div className="text-center mb-12">
-          <Skeleton className="h-12 w-96 mx-auto mb-4 bg-gray-800" />
-          <Skeleton className="h-6 w-2/3 mx-auto bg-gray-800" />
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-[#09111f] text-white relative overflow-hidden px-4 py-36">
+      {/* Floating Accents */}
+      <div className="absolute top-10 left-10 w-6 h-6 bg-[#ca6678] rounded-full animate-ping opacity-30" />
+      <div className="absolute bottom-20 right-20 w-8 h-8 bg-[#fcbf5b] rounded-full animate-ping opacity-20" />
 
-        {/* Resources Grid Skeleton */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Card key={i} className="bg-gray-900/50 border-gray-800">
-              <CardHeader>
-                <Skeleton className="w-full h-48 rounded-lg mb-4 bg-gray-800" />
-                <div className="flex items-center gap-2 mb-2">
-                  <Skeleton className="h-6 w-20 bg-gray-800" />
-                  <Skeleton className="h-6 w-16 bg-gray-800" />
-                </div>
-                <Skeleton className="h-6 w-3/4 bg-gray-800" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-4 w-full mb-2 bg-gray-800" />
-                <Skeleton className="h-4 w-2/3 mb-4 bg-gray-800" />
+      {/* Glowing Background Ring */}
+      <div className="absolute inset-0 flex items-center justify-center z-0">
+        <div className="w-72 h-72 rounded-full bg-gradient-to-tr from-[#ca6678] to-[#fcbf5b] blur-3xl opacity-10" />
+      </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <Skeleton className="h-4 w-24 bg-gray-800" />
-                  <Skeleton className="h-4 w-20 bg-gray-800" />
-                </div>
+      {/* Main Content */}
+      <div className="z-10 text-center space-y-6">
+        {/* Gradient Spinner */}
+        <div className="w-20 h-20 border-[6px] border-transparent border-t-gradient rounded-full animate-spin mx-auto" />
 
-                <Skeleton className="h-10 w-full bg-gray-800" />
-              </CardContent>
-            </Card>
-          ))}
+        <div>
+          <h2 className="text-3xl font-bold animate-pulse tracking-wide">
+            Preparing Your Content...
+          </h2>
+          <p className="text-gray-400">
+            Unleashing the power of AI & creativity. Hang tight.
+          </p>
         </div>
       </div>
+
+      {/* Custom Gradient Border Top */}
+      <style jsx>{`
+        .border-t-gradient {
+          border-top: 6px solid;
+          border-image: linear-gradient(to right, #ca6678, #fcbf5b) 1;
+        }
+      `}</style>
     </div>
   );
 }

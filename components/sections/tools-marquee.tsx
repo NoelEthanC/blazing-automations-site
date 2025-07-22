@@ -25,14 +25,17 @@ export function ToolsMarquee() {
   }, []);
 
   return (
-    <section className="py-16 bg-[#09111f] border-y border-gray-800 overflow-hidden">
+    <section
+      id="tools"
+      className="py-32 bg-[#09111f] border-y border-gray-800 overflow-hidden"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
+          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">
             <span className="gradient-text">Trusted Tools </span>
             We Use
           </h2>
-          <p className="text-gray-400">
+          <p className="text-slate-text">
             Integrating with the best platforms to deliver powerful solutions
           </p>
         </div>

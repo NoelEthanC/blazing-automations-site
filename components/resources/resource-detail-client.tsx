@@ -86,6 +86,7 @@ export function ResourceDetailClient({
                           src={resource.thumbnail || "/placeholder.svg"}
                           alt={resource.title}
                           fill
+                          priority
                           className="object-cover h-full rounded-r-none"
                         />
                       ) : (
@@ -113,7 +114,7 @@ export function ResourceDetailClient({
                 </h1>
 
                 {/* Description */}
-                <p className="text-gray-300 text-lg leading-relaxed">
+                <p className="text-slate-text text-base leading-relaxed line-clamp-3">
                   {resource.description}
                 </p>
 
@@ -121,7 +122,7 @@ export function ResourceDetailClient({
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2 text-gray-400">
                     <FileText className="h-4 w-4" />
-                    <span className="text-sm">File Type: JSON(zipped)</span>
+                    <span className="text-sm">File Type: JSON/(zipped)</span>
                   </div>
                   {resource.tool && (
                     <div className="flex items-center space-x-2 text-gray-400">
