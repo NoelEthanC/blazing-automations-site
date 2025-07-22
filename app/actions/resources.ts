@@ -287,7 +287,7 @@ export async function getAllResources() {
 // Admin: Create new resource
 export async function createResource(prevState: any, formData: FormData) {
   try {
-    throw new Error("This function is not implemented yet");
+    // throw new Error("This function is not implemented yet");
     const user = await requireAdmin();
 
     const title = formData.get("title") as string;
