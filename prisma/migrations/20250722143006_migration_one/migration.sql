@@ -25,7 +25,7 @@ CREATE TABLE `resources` (
     `filePath` VARCHAR(191) NULL,
     `fileType` VARCHAR(191) NULL,
     `tool` VARCHAR(191) NULL,
-    `category` ENUM('MAKE_TEMPLATES', 'ZAPIER_TEMPLATES', 'N8N_TEMPLATES', 'AUTOMATION_GUIDES', 'TOOLS_RESOURCES') NOT NULL,
+    `category` ENUM('MAKE_TEMPLATES', 'ZAPIER_TEMPLATES', 'N8N_TEMPLATES', 'AUTOMATION_GUIDES', 'TOOLS_RESOURCES', 'TEMPLATE', 'GUIDE', 'TOOL') NOT NULL,
     `hasGuide` BOOLEAN NOT NULL DEFAULT false,
     `guideUrl` VARCHAR(191) NULL,
     `featured` BOOLEAN NOT NULL DEFAULT false,
@@ -45,8 +45,11 @@ CREATE TABLE `resource_downloads` (
     `email` VARCHAR(191) NOT NULL,
     `action` ENUM('DOWNLOAD', 'EMAIL') NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `expiresAt` DATETIME(3) NULL DEFAULT DATE_ADD(NOW(), INTERVAL 1 DAY),
+    `token` VARCHAR(191) NOT NULL,
     `resourceId` VARCHAR(191) NOT NULL,
 
+    UNIQUE INDEX `resource_downloads_token_key`(`token`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
