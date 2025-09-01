@@ -1,59 +1,67 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { prisma } from "@/lib/prisma";
-import { redirect } from "next/navigation";
+import { auth, currentUser } from "@clerk/nextjs/server"
+import { prisma } from "@/lib/prisma"
 
 export async function requireAuth() {
-  const { userId } = await auth();
+  // If Clerk is not configured, return null
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return null
+  }
+
+  const { userId } = await auth()
 
   if (!userId) {
-    redirect("/sign-in");
+    throw new Error("Unauthorized")
   }
 
-  return userId;
-}
-
-export async function requireAdmin() {
-  const user = await currentUser();
-
-  if (!user) {
-    redirect("/sign-in");
-  }
-
-  // Check if user exists in database and is admin
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkId: user.id },
-  });
-
-  if (!dbUser || dbUser.role !== "ADMIN") {
-    throw new Error("Admin access required");
-  }
-
-  return dbUser;
+  return userId
 }
 
 export async function getCurrentUser() {
-  const user = await currentUser();
-
-  if (!user) {
-    return null;
+  // If Clerk is not configured, return null
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return null
   }
 
-  // Sync user with database
-  const dbUser = await prisma.user.upsert({
-    where: { clerkId: user.id },
-    update: {
-      email: user.emailAddresses[0]?.emailAddress || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-    },
-    create: {
-      clerkId: user.id,
-      email: user.emailAddresses[0]?.emailAddress || "",
-      firstName: user.firstName || "",
-      lastName: user.lastName || "",
-      role: "ADMIN",
-    },
-  });
+  try {
+    const user = await currentUser()
 
-  return dbUser;
+    if (!user) {
+      return null
+    }
+
+    // Sync user with database
+    const dbUser = await prisma.user.upsert({
+      where: { clerkId: user.id },
+      update: {
+        email: user.emailAddresses[0]?.emailAddress || "",
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Anonymous",
+        updatedAt: new Date(),
+      },
+      create: {
+        clerkId: user.id,
+        email: user.emailAddresses[0]?.emailAddress || "",
+        name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || "Anonymous",
+      },
+    })
+
+    return dbUser
+  } catch (error) {
+    console.error("Error getting current user:", error)
+    return null
+  }
+}
+
+export async function isAdmin() {
+  // If Clerk is not configured, return false
+  if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
+    return false
+  }
+
+  try {
+    const user = await getCurrentUser()
+    return user?.role === "ADMIN"
+  } catch (error) {
+    console.error("Error checking admin status:", error)
+    return false
+  }
 }

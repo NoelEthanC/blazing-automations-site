@@ -5,9 +5,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
+    "postinstall": "prisma generate",
     "lint": "next lint",
-    "start": "next start",
-    "postinstall": "prisma generate"
+    "start": "next start"
   },
   "dependencies": {
     "@clerk/nextjs": "latest",
@@ -40,14 +40,16 @@
     "@radix-ui/react-toggle": "latest",
     "@radix-ui/react-toggle-group": "latest",
     "@radix-ui/react-tooltip": "latest",
-    "@supabase/supabase-js": "^2.52.0",
+    "@react-email/render": "latest",
+    "@supabase/supabase-js": "latest",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "latest",
+    "crypto": "latest",
     "date-fns": "latest",
     "embla-carousel-react": "latest",
-    "fs": "^0.0.1-security",
+    "fs": "latest",
     "gsap": "latest",
     "input-otp": "latest",
     "lucide-react": "^0.454.0",
@@ -68,7 +70,7 @@
     "sonner": "latest",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "use-debounce": "^10.0.5",
+    "use-debounce": "latest",
     "vaul": "latest",
     "zod": "^3.24.1"
   },

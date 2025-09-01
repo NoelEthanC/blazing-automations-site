@@ -1,168 +1,163 @@
-"use client";
+"use client"
 
-import { useState, useRef, useEffect } from "react";
-import { usePathname } from "next/navigation";
-import Link from "next/link";
-import gsap from "gsap";
-import { Button } from "@/components/ui/button";
-import { Zap, Menu, X, ExternalLink } from "lucide-react";
-import { handleLinkClick } from "@/lib/utils";
-import Image from "next/image";
+import { useState } from "react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Menu, X } from "lucide-react"
+import { UserButton, useUser } from "@clerk/nextjs"
+import Image from "next/image"
 
 const Header = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const pathname = usePathname();
-  const navRef = useRef<HTMLDivElement>(null); // <- GSAP target
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isSignedIn, isLoaded } = useUser()
 
-  useEffect(() => {
-    if (navRef.current) {
-      gsap.fromTo(
-        navRef.current,
-        { opacity: 0, y: -20 },
-        { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" }
-      );
-    }
-  }, []);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen)
+  }
 
   const navItems = [
-    { label: "Home", href: "/" },
-    { label: "About us", href: "/about" },
-    { label: "Services", href: "/#services" },
-    { label: "Resources", href: "/resources" },
-    { label: "Contact", href: "/#contact" },
-  ];
-
-  const closeMobileMenu = () => {
-    setIsMenuOpen(false);
-  };
+    { name: "Home", href: "/" },
+    { name: "About us", href: "/about" },
+    { name: "Services", href: "/#services" },
+    { name: "Resources", href: "/resources" },
+    { name: "Contact", href: "/#contact" },
+  ]
 
   return (
-    <nav
-      ref={navRef}
-      className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-4 md:px-8"
-    >
-      <div className="bg-midnight-blue/70 backdrop-blur-sm border border-gray-text/20 rounded-2xl lg:rounded-full px-6 py-3">
-        <div className="flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-[#09111f]/95 backdrop-blur-sm border-b border-gray-800">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3 w-fit">
-            <div className="w-8 h-8 bg-gradient-upstream rounded-lg flex items-center justify-center">
-              <Image
-                src="/images/logos/blazing-logo-trans.png"
-                alt="Logo"
-                width={64}
-                height={64}
-                className="w-24 h-24  object-contain"
-              />
-              {/* <Zap className="w-5 h-5 text-white" /> */}
-            </div>
-            <Link
-              href="/"
-              onClick={closeMobileMenu}
-              className="font-sora font-bold text-lg text-white w-auto"
-            >
-              Blazing Automations
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center space-x-2">
+            <Image
+              src="/images/logos/blazing-logo-trans.png"
+              alt="Blazing Automations"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="text-xl font-bold text-white">Blazing Automations</span>
+          </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6 ml-8">
+          <nav className="hidden md:flex items-center space-x-8">
             {navItems.map((item) => (
               <Link
+                key={item.name}
                 href={item.href}
-                onClick={() => handleLinkClick(item.href)}
-                key={item.label}
-                className="text-slate-text hover:text-white transition-colors font-work-sans text-sm"
+                className="text-gray-300 hover:text-white transition-colors duration-200"
               >
-                {item.label}
+                {item.name}
               </Link>
             ))}
-          </div>
+          </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:block ml-6">
-            {pathname !== "/" && !pathname.includes("/#") ? (
-              <Link
-                href="https://www.youtube.com/@BlazingAutomations"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="gradient-upstream text-white font-work-sans font-semibold px-4 py-2 rounded-full hover-glow text-base"
+          {/* Desktop CTA and User */}
+          <div className="hidden md:flex items-center space-x-4">
+            <Link href="/watch-us-build">
+              <Button
+                variant="outline"
+                className="bg-gradient-to-r from-orange-500 to-red-500 text-white border-none hover:from-orange-600 hover:to-red-600"
               >
                 Watch Us Build
-                <ExternalLink className="ml-2 w-4 h-4 inline-block" />
-              </Link>
-            ) : (
-              <Button
-                onClick={() => handleLinkClick("#featured-resource")}
-                className="bg-gradient-to-r from-flower-pink to-sunray text-white font-work-sans font-semibold px-4 py-2 rounded-full hover-glow text-sm"
-              >
-                Get Our Templates
-                <span className="ml-2 bg-sunray text-green-800 px-2 py-1 rounded-full text-xs font-bold">
-                  FREE
-                </span>
               </Button>
+            </Link>
+
+            {/* Only show auth components if Clerk is configured */}
+            {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && isLoaded && (
+              <>
+                {isSignedIn ? (
+                  <div className="flex items-center space-x-2">
+                    <Link href="/admin">
+                      <Button variant="ghost" size="sm">
+                        Admin
+                      </Button>
+                    </Link>
+                    <UserButton afterSignOutUrl="/" />
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Link href="/sign-in">
+                      <Button variant="ghost" size="sm">
+                        Sign In
+                      </Button>
+                    </Link>
+                    <Link href="/sign-up">
+                      <Button size="sm">Sign Up</Button>
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <Button
-            className="md:hidden text-midnight-blue font-bold ml-4"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
-          </Button>
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button onClick={toggleMenu} className="text-gray-300 hover:text-white focus:outline-none focus:text-white">
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 pt-4 border-t border-gray-text/10">
-            <div className="flex flex-col space-y-3">
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-[#09111f] border-t border-gray-800">
               {navItems.map((item) => (
                 <Link
-                  key={item.label}
+                  key={item.name}
                   href={item.href}
-                  className="text-slate-text hover:text-white transition-colors font-work-sans text-sm"
-                  onClick={() => {
-                    handleLinkClick(item.href);
-                    closeMobileMenu();
-                  }}
+                  className="block px-3 py-2 text-gray-300 hover:text-white transition-colors duration-200"
+                  onClick={() => setIsMenuOpen(false)}
                 >
-                  {item.label}
+                  {item.name}
                 </Link>
               ))}
-
-              <div className=" ml-6">
-                {pathname !== "/" && !pathname.includes("/#") ? (
-                  <Link
-                    href="https://www.youtube.com/@BlazingAutomations"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="gradient-upstream text-white font-work-sans font-semibold px-4 py-2 rounded-full hover-glow text-base"
+              <div className="px-3 py-2 space-y-2">
+                <Link href="/watch-us-build" onClick={() => setIsMenuOpen(false)}>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-gradient-to-r from-orange-500 to-red-500 text-white border-none hover:from-orange-600 hover:to-red-600"
                   >
                     Watch Us Build
-                    <ExternalLink className="ml-2 w-4 h-4 inline-block" />
-                  </Link>
-                ) : (
-                  <Button
-                    onClick={() => handleLinkClick("#featured-resource")}
-                    className="bg-gradient-to-r from-flower-pink to-sunray text-white font-work-sans font-semibold px-4 py-2 rounded-full hover-glow text-sm"
-                  >
-                    Get Our Templates
-                    <span className="ml-2 bg-sunray text-green-800 px-2 py-1 rounded-full text-xs font-bold">
-                      FREE
-                    </span>
                   </Button>
+                </Link>
+
+                {/* Only show auth components if Clerk is configured */}
+                {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && isLoaded && (
+                  <>
+                    {isSignedIn ? (
+                      <div className="flex items-center justify-between">
+                        <Link href="/admin" onClick={() => setIsMenuOpen(false)}>
+                          <Button variant="ghost" size="sm">
+                            Admin
+                          </Button>
+                        </Link>
+                        <UserButton afterSignOutUrl="/" />
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <Link href="/sign-in" onClick={() => setIsMenuOpen(false)}>
+                          <Button variant="ghost" size="sm" className="w-full">
+                            Sign In
+                          </Button>
+                        </Link>
+                        <Link href="/sign-up" onClick={() => setIsMenuOpen(false)}>
+                          <Button size="sm" className="w-full">
+                            Sign Up
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           </div>
         )}
       </div>
-    </nav>
-  );
-};
+    </header>
+  )
+}
 
-export default Header;
+export default Header
