@@ -1,46 +1,55 @@
-"use client"
+"use client";
 
-import { useEffect, useRef } from "react"
-import { Button } from "@/components/ui/button"
-import gsap from "gsap"
-import { cn, handleLinkClick } from "@/lib/utils"
-import { ArrowRight, PlayCircle, Star, ArrowDown } from "lucide-react"
-import { trackEvent } from "@/lib/analytics"
-import { events } from "@/lib/eventRegistry"
+import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import gsap from "gsap";
+import { cn, handleLinkClick } from "@/lib/utils";
+import { ArrowRight, PlayCircle, Star, ArrowDown } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+import { events } from "@/lib/eventRegistry";
 
 const HeroSection = () => {
-  const heroRef = useRef<HTMLDivElement>(null)
-  const titleRef = useRef<HTMLHeadingElement>(null)
-  const subtitleRef = useRef<HTMLParagraphElement>(null)
-  const buttonsRef = useRef<HTMLDivElement>(null)
-  const statsRef = useRef<HTMLDivElement>(null)
-  const trustpilotRef = useRef<HTMLDivElement>(null)
-  const leftImageRef = useRef<HTMLDivElement>(null)
-  const rightImageRef = useRef<HTMLDivElement>(null)
-  const leftArrowRef = useRef<HTMLDivElement>(null)
-  const rightArrowRef = useRef<HTMLDivElement>(null)
+  const heroRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const subtitleRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
+  const trustpilotRef = useRef<HTMLDivElement>(null);
+  const leftImageRef = useRef<HTMLDivElement>(null);
+  const rightImageRef = useRef<HTMLDivElement>(null);
+  const leftArrowRef = useRef<HTMLDivElement>(null);
+  const rightArrowRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       // Initial states
-      gsap.set([titleRef.current, subtitleRef.current, buttonsRef.current, statsRef.current, trustpilotRef.current], {
-        opacity: 0,
-        y: 50,
-      })
+      gsap.set(
+        [
+          titleRef.current,
+          subtitleRef.current,
+          buttonsRef.current,
+          statsRef.current,
+          trustpilotRef.current,
+        ],
+        {
+          opacity: 0,
+          y: 50,
+        }
+      );
 
       gsap.set([leftImageRef.current, rightImageRef.current], {
         opacity: 0,
         scale: 0.8,
         y: 20,
-      })
+      });
 
       gsap.set([leftArrowRef.current, rightArrowRef.current], {
         opacity: 0,
         x: 0,
-      })
+      });
 
       // Timeline animations
-      const tl = gsap.timeline({ delay: 0.5 })
+      const tl = gsap.timeline({ delay: 0.5 });
 
       tl.to(trustpilotRef.current, {
         opacity: 1,
@@ -56,7 +65,7 @@ const HeroSection = () => {
             duration: 1,
             ease: "power3.out",
           },
-          "-=0.4",
+          "-=0.4"
         )
         .to(
           [leftImageRef.current, rightImageRef.current],
@@ -68,7 +77,7 @@ const HeroSection = () => {
             ease: "power3.out",
             stagger: 0.2,
           },
-          "-=0.6",
+          "-=0.6"
         )
         .to(
           [leftArrowRef.current, rightArrowRef.current],
@@ -79,7 +88,7 @@ const HeroSection = () => {
             ease: "power3.out",
             stagger: 0.1,
           },
-          "-=0.4",
+          "-=0.4"
         )
         .to(
           subtitleRef.current,
@@ -89,7 +98,7 @@ const HeroSection = () => {
             duration: 0.8,
             ease: "power3.out",
           },
-          "-=0.6",
+          "-=0.6"
         )
         .to(
           buttonsRef.current,
@@ -99,7 +108,7 @@ const HeroSection = () => {
             duration: 0.8,
             ease: "power3.out",
           },
-          "-=0.4",
+          "-=0.4"
         )
         .to(
           statsRef.current,
@@ -109,8 +118,8 @@ const HeroSection = () => {
             duration: 0.8,
             ease: "power3.out",
           },
-          "-=0.4",
-        )
+          "-=0.4"
+        );
 
       // Floating effect
       gsap.to(".floating-dot", {
@@ -120,7 +129,7 @@ const HeroSection = () => {
         yoyo: true,
         repeat: -1,
         stagger: 0.2,
-      })
+      });
 
       // Arrow pulse
       gsap.to([leftArrowRef.current, rightArrowRef.current], {
@@ -130,26 +139,26 @@ const HeroSection = () => {
         yoyo: true,
         repeat: -1,
         stagger: 0.3,
-      })
-    }, heroRef)
+      });
+    }, heroRef);
 
-    return () => ctx.revert()
-  }, [])
+    return () => ctx.revert();
+  }, []);
 
   const handleBookConsultClick = () => {
-    trackEvent(...Object.values(events.hero.bookConsult()))
-    handleLinkClick("#contact")
-  }
+    trackEvent(...Object.values(events.hero.bookConsult()));
+    handleLinkClick("#contact");
+  };
 
   const handleWatchUsBuildClick = () => {
-    trackEvent(...Object.values(events.hero.watchUsBuild()))
-    handleLinkClick("#watch-us-build")
-  }
+    trackEvent(...Object.values(events.hero.watchUsBuild()));
+    handleLinkClick("#watch-us-build");
+  };
 
   const handleScrollDownClick = () => {
-    trackEvent(...Object.values(events.hero.scrollDown()))
-    handleLinkClick("#tools")
-  }
+    trackEvent(...Object.values(events.hero.scrollDown()));
+    handleLinkClick("#tools");
+  };
 
   return (
     <section
@@ -162,7 +171,7 @@ const HeroSection = () => {
           "absolute inset-0 z-0 opacity-5",
           "[background-size:40px_40px]",
           "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",
-          "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]",
+          "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
         )}
       />
 
@@ -192,20 +201,30 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
-        <div ref={leftArrowRef} className="absolute -right-8 top-1/2 transform -translate-y-1/2">
+        <div
+          ref={leftArrowRef}
+          className="absolute -right-8 top-1/2 transform -translate-y-1/2"
+        >
           <ArrowRight className="w-6 h-6 text-sunray" />
         </div>
       </div>
 
       {/* Right image with arrow */}
       <div className="absolute right-8 lg:right-8 top-52 transform -translate-y-1/2 hidden lg:block">
-        <div ref={rightArrowRef} className="absolute -left-8 top-1/2 transform -translate-y-1/2 rotate-180">
+        <div
+          ref={rightArrowRef}
+          className="absolute -left-8 top-1/2 transform -translate-y-1/2 rotate-180"
+        >
           <ArrowRight className="w-6 h-6 text-sunray" />
         </div>
         <div ref={rightImageRef}>
           <div className="w-48 h-32 bg-card/20 backdrop-blur-sm border border-gray-text/20 rounded-lg p-4 shadow-lg">
             <div className="w-full h-full bg-gradient-to-br from-sunray/20 to-light-blue/20 rounded flex items-center justify-center">
-              <img src="/images/bot-1.png" alt="bot" className="w-[50%] h-[50%] opacity-40 object-contain absolute" />
+              <img
+                src="/images/bot-1.png"
+                alt="bot"
+                className="w-[50%] h-[50%] opacity-40 object-contain absolute"
+              />
             </div>
           </div>
         </div>
@@ -213,15 +232,22 @@ const HeroSection = () => {
 
       {/* Hero content */}
       <div className="max-w-6xl mx-auto text-center relative z-30">
-        <div ref={trustpilotRef} className="flex items-center justify-center mb-3">
+        <div
+          ref={trustpilotRef}
+          className="flex items-center justify-center mb-3"
+        >
           <div className="bg-card/20 backdrop-blur-sm border border-gray-text/20 rounded-full px-6 py-2 flex items-center space-x-3">
-            <span className="text-xs font-work-sans font-semibold text-white">AI</span>
+            <span className="text-xs font-work-sans font-semibold text-white">
+              AI
+            </span>
             <div className="flex space-x-1">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="w-2.5 h-2.5 fill-sunray text-sunray" />
               ))}
             </div>
-            <span className="text-xs font-work-sans text-slate-text">AUTOMATIONS EXPERT</span>
+            <span className="text-xs font-work-sans text-slate-text">
+              AUTOMATIONS EXPERT
+            </span>
           </div>
         </div>
 
@@ -229,18 +255,23 @@ const HeroSection = () => {
           ref={titleRef}
           className="font-sora font-bold text-4xl lg:w-2/3 text-center mx-auto md:text-6xl lg:text-7xl leading-tight mb-6"
         >
-          <span className="gradient-text">Your Ideas</span> <span className="text-white">Into Solutions </span>
+          <span className="gradient-text">Your Ideas</span>{" "}
+          <span className="text-white">Into Solutions </span>
           <span className="text-white">that work </span> <br />
           <span className="gradient-text">for you</span>
         </h1>
 
         <div ref={subtitleRef} className="space-y-4 mb-12">
           <p className="font-inter text-lg text-gray-300 max-w-2xl mx-auto">
-            From <strong>AI</strong> automations to stunning websites that work for you daily
+            From <strong>AI</strong> automations to stunning websites that work
+            for you daily
           </p>
         </div>
 
-        <div ref={buttonsRef} className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+        <div
+          ref={buttonsRef}
+          className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16"
+        >
           <Button
             onClick={handleBookConsultClick}
             className="gradient-upstream text-white font-work-sans font-bold text-lg px-12 py-6 rounded-full hover-glow group"
@@ -268,7 +299,7 @@ const HeroSection = () => {
         </div>
       </button>
     </section>
-  )
-}
+  );
+};
 
-export default HeroSection
+export default HeroSection;
