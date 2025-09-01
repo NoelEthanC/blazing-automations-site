@@ -1,222 +1,231 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Download, ArrowLeft, Play, ExternalLink } from "lucide-react"
-import { DownloadModal } from "./download-modal"
-import Link from "next/link"
-import { trackEvent } from "@/lib/analytics"
-import { events } from "@/lib/eventRegistry"
-
-interface Resource {
-  id: string
-  title: string
-  description: string
-  slug: string
-  category: string
-  tool: string
-  thumbnail: string | null
-  fileUrl: string | null
-  downloadCount: number
-  createdAt: Date
-  updatedAt: Date
-  author: {
-    firstName: string | null
-    lastName: string | null
-  } | null
-}
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { DownloadModal } from "./download-modal";
+import { Download, ChevronRight, Play, FileText, Tag } from "lucide-react";
+import { trackEvent } from "@/lib/analytics";
+import { events } from "@/lib/eventRegistry";
 
 interface ResourceDetailClientProps {
-  resource: Resource
-  relatedResources: Resource[]
+  resource: {
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    longDescription: string | null;
+    thumbnail: string | null;
+    category: string;
+    tool: string | null;
+    hasGuide: boolean;
+    guideUrl: string | null;
+    downloadsCount: number;
+    createdAt: Date;
+    author: {
+      firstName: string | null;
+      lastName: string | null;
+      email: string;
+    };
+  };
+  relatedResources: Array<{
+    id: string;
+    title: string;
+    slug: string;
+    description: string;
+    thumbnail: string | null;
+    category: string;
+    downloadsCount: number;
+  }>;
 }
 
-export function ResourceDetailClient({ resource, relatedResources }: ResourceDetailClientProps) {
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false)
+export function ResourceDetailClient({
+  resource,
+  relatedResources,
+}: ResourceDetailClientProps) {
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
 
-  // Track resource view on component mount
+  // Track resource view on mount
   useEffect(() => {
-    trackEvent(...Object.values(events.resources.view(resource.slug)))
-  }, [resource.slug])
+    trackEvent(...Object.values(events.resources.view(resource.slug)));
+  }, [resource.slug]);
 
   const handleDownloadClick = () => {
-    setIsDownloadModalOpen(true)
-  }
+    setIsDownloadModalOpen(true);
+    trackEvent(...Object.values(events.resources.download(resource.slug)));
+  };
 
-  const handleRelatedResourceClick = (relatedResource: Resource) => {
-    trackEvent(...Object.values(events.resources.view(relatedResource.slug)))
-  }
+  const handleRelatedResourceClick = (relatedSlug: string) => {
+    trackEvent(...Object.values(events.resources.view(relatedSlug)));
+  };
+
+  const categoryLabels = {
+    MAKE_TEMPLATES: "Make.com Templates",
+    ZAPIER_TEMPLATES: "Zapier Templates",
+    N8N_TEMPLATES: "n8n Templates",
+    AUTOMATION_GUIDES: "Automation Guides",
+    TOOLS_RESOURCES: "Tools & Resources",
+  };
 
   return (
-    <div className="min-h-screen bg-[#0a1628] text-white">
+    <main className="min-h-screen bg-[#0a1628] text-white  py-32">
       {/* Breadcrumb */}
-      <div className="border-b border-gray-800">
+      <div className="">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center space-x-2 text-sm">
-            <Link href="/resources" className="text-[#3f79ff] hover:text-[#2563eb] flex items-center">
-              <ArrowLeft className="h-4 w-4 mr-1" />
+            <Link
+              href="/resources"
+              className="text-[#4f9cf9] hover:text-[#4f9cf9]/80"
+            >
               Resources
             </Link>
-            <span className="text-gray-500">/</span>
+            <ChevronRight className="h-4 w-4 text-gray-500" />
             <span className="text-gray-400">{resource.title}</span>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 ">
           {/* Main Content */}
-          <div className="lg:col-span-2">
-            {/* Resource Preview */}
-            <div className="relative mb-8">
-              <div className="aspect-video bg-gray-800 rounded-lg overflow-hidden relative">
-                {resource.thumbnail ? (
-                  <img
-                    src={resource.thumbnail || "/placeholder.svg"}
-                    alt={resource.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <div className="text-center">
-                      <Download className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                      <p className="text-gray-400">Resource Preview</p>
+          <div className="lg:col-span-8 bg-secondary-blue/10 border-[#202c42] border group rounded-xl shadow-lg overflow-hidden pr-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Resource Preview */}
+              <div className="relative">
+                <Card className="bg-secondary-blue/40 border-gray-700 rounded-r-none overflow-hidden h-full ">
+                  <CardContent className="p-0 relative">
+                    <div className="relative aspect-[4/4] rounded-r-none bg-gradient-to-br from-gray-700 to-gray-800">
+                      {resource.thumbnail ? (
+                        <Image
+                          src={resource.thumbnail || "/placeholder.svg"}
+                          alt={resource.title}
+                          fill
+                          priority
+                          className="object-cover h-full rounded-r-none"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <FileText className="h-16 w-16 text-gray-500" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                )}
-                {/* PROMO Badge */}
-                <div className="absolute top-4 left-4">
-                  <Badge className="bg-gradient-to-r from-pink-500 to-orange-500 text-white font-semibold px-3 py-1">
-                    PROMO
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Resource Details */}
+              <div className="flex flex-col justify-center space-y-6 py-4">
+                {/* Category Badge */}
+                <div>
+                  <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 font-medium">
+                    {resource.category.toLowerCase().replace("_", " ")}
                   </Badge>
                 </div>
-              </div>
-            </div>
 
-            {/* Resource Details */}
-            <div className="space-y-6">
-              <div>
-                <Badge variant="secondary" className="bg-orange-500/20 text-orange-400 mb-4">
-                  {resource.category}
-                </Badge>
-                <h1 className="text-4xl font-bold text-white mb-4">{resource.title}</h1>
-                <p className="text-gray-300 text-lg leading-relaxed">{resource.description}</p>
-              </div>
+                {/* Title */}
+                <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                  {resource.title}
+                </h1>
 
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  onClick={handleDownloadClick}
-                  className="bg-[#3f79ff] hover:bg-[#2563eb] text-white px-8 py-3 text-lg"
-                >
-                  <Download className="h-5 w-5 mr-2" />
-                  Download Template
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-gray-700 text-gray-300 hover:bg-gray-800 px-8 py-3 text-lg bg-transparent"
-                >
-                  <Play className="h-5 w-5 mr-2" />
-                  Watch the Setup Guide
-                </Button>
-              </div>
+                {/* Description */}
+                <p className="text-slate-text text-base leading-relaxed line-clamp-3">
+                  {resource.description}
+                </p>
 
-              {/* Resource Metadata */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{resource.downloadCount}</div>
-                  <div className="text-sm text-gray-400">Downloads</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">{resource.tool}</div>
-                  <div className="text-sm text-gray-400">Tool</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">Free</div>
-                  <div className="text-sm text-gray-400">Price</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    {new Date(resource.createdAt).toLocaleDateString()}
+                {/* File Info */}
+                <div className="space-y-2">
+                  <div className="flex items-center space-x-2 text-gray-400">
+                    <FileText className="h-4 w-4" />
+                    <span className="text-sm">File Type: JSON/(zipped)</span>
                   </div>
-                  <div className="text-sm text-gray-400">Published</div>
+                  {resource.tool && (
+                    <div className="flex items-center space-x-2 text-gray-400">
+                      <Tag className="h-4 w-4" />
+                      <span className="text-sm">Tool: {resource.tool}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <Button
+                    size="lg"
+                    className="w-full bg-[#4f9cf9] hover:bg-[#4f9cf9]/80 text-white font-medium py-3"
+                    onClick={handleDownloadClick}
+                  >
+                    <Download className="h-5 w-5 mr-2" />
+                    Download Template
+                  </Button>
+
+                  {resource.hasGuide && resource.guideUrl && (
+                    <Button
+                      size="lg"
+                      variant="outline"
+                      className="w-full border-[#4f9cf9] text-[#4f9cf9] hover:bg-[#4f9cf9] hover:text-white bg-transparent font-medium py-3"
+                      asChild
+                    >
+                      <a
+                        href={resource.guideUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={() =>
+                          trackEvent(
+                            ...Object.values(
+                              events.resources.guide(resource.slug)
+                            )
+                          )
+                        }
+                      >
+                        <Play className="h-5 w-5 mr-2" />
+                        Watch the Setup Guide
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-8">
-            {/* Resource Info Card */}
-            <Card className="bg-gray-800/50 border-gray-700">
-              <CardContent className="p-6 space-y-4">
-                <h3 className="text-lg font-semibold text-white">Resource Details</h3>
-                <Separator className="bg-gray-700" />
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">File Type:</span>
-                    <span className="text-white">JSON(zipped)</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Tool:</span>
-                    <span className="text-white">{resource.tool}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Downloads:</span>
-                    <span className="text-white">{resource.downloadCount}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Published:</span>
-                    <span className="text-white">{new Date(resource.createdAt).toLocaleDateString()}</span>
-                  </div>
-                  {resource.author && (
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-400">Author:</span>
-                      <span className="text-white">
-                        {resource.author.firstName} {resource.author.lastName}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Related Resources */}
+          {/* Sidebar - Related Resources */}
+          <div className="lg:col-span-4">
             {relatedResources.length > 0 && (
-              <Card className="bg-gray-800/50 border-gray-700">
+              <Card className=" bg-transparent border-none">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">More Templates You'll Love</h3>
+                  <h3 className="text-xl font-semibold text-white mb-6">
+                    More Templates You'll Love
+                  </h3>
                   <div className="space-y-4">
-                    {relatedResources.slice(0, 5).map((relatedResource) => (
+                    {relatedResources.map((related) => (
                       <Link
-                        key={relatedResource.id}
-                        href={`/resources/${relatedResource.slug}`}
-                        onClick={() => handleRelatedResourceClick(relatedResource)}
-                        className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors group"
+                        key={related.id}
+                        href={`/resources/${related.slug}`}
+                        onClick={() => handleRelatedResourceClick(related.slug)}
+                        className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-700/50 transition-colors group"
                       >
-                        <div className="w-12 h-12 bg-gray-700 rounded-lg flex-shrink-0 overflow-hidden">
-                          {relatedResource.thumbnail ? (
-                            <img
-                              src={relatedResource.thumbnail || "/placeholder.svg"}
-                              alt={relatedResource.title}
+                        <div className="w-12 h-12 bg-gray-700 rounded overflow-hidden flex-shrink-0">
+                          {related.thumbnail ? (
+                            <Image
+                              src={related.thumbnail || "/placeholder.svg"}
+                              alt={related.title}
+                              width={48}
+                              height={48}
                               className="w-full h-full object-cover"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                              <Download className="h-6 w-6 text-gray-500" />
+                              <FileText className="h-6 w-6 text-gray-500" />
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-white font-medium group-hover:text-[#3f79ff] transition-colors truncate">
-                            {relatedResource.title}
+                          <h4 className="text-white font-medium group-hover:text-[#4f9cf9] transition-colors text-sm leading-tight mb-1">
+                            {related.title}
                           </h4>
-                          <p className="text-gray-400 text-sm">Template</p>
+                          <p className="text-gray-400 text-xs">Template</p>
                         </div>
-                        <ExternalLink className="h-4 w-4 text-gray-500 group-hover:text-[#3f79ff] transition-colors" />
                       </Link>
                     ))}
                   </div>
@@ -227,13 +236,12 @@ export function ResourceDetailClient({ resource, relatedResources }: ResourceDet
         </div>
       </div>
 
-      {/* Download Modal */}
       <DownloadModal
         isOpen={isDownloadModalOpen}
         onClose={() => setIsDownloadModalOpen(false)}
         resourceTitle={resource.title}
         resourceSlug={resource.slug}
       />
-    </div>
-  )
+    </main>
+  );
 }
