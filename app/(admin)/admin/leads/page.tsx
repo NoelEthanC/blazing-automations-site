@@ -1,6 +1,6 @@
-import { Suspense } from "react"
-import { LeadsManagement } from "@/components/admin/leads-management"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Suspense } from "react";
+import { LeadsManagement } from "@/components/admin/leads-management";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function LeadsLoadingSkeleton() {
   return (
@@ -35,20 +35,22 @@ function LeadsLoadingSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default function LeadsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Leads Management</h1>
-        <p className="text-gray-600 mt-2">View and manage users who have downloaded your resources</p>
+        <h1 className="text-3xl font-bold text-white mb-2">Leads Management</h1>
+        <p className="text-gray-600 mt-2">
+          View and manage users who have downloaded your resources
+        </p>
       </div>
 
       <Suspense fallback={<LeadsLoadingSkeleton />}>
         <LeadsManagement />
       </Suspense>
     </div>
-  )
+  );
 }

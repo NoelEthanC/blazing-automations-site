@@ -10,14 +10,31 @@ import {
   Settings,
   Edit3,
   Zap,
+  MessageCircleIcon,
 } from "lucide-react";
 
 const navigation = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { name: "Resources", href: "/admin/resources", icon: FileText },
-  { name: "Content Management", href: "/admin/content", icon: Edit3 },
-  { name: "Leads", href: "/admin/contacts", icon: Users },
-  { name: "Settings", href: "/admin/settings", icon: Settings },
+  {
+    group: "Main",
+    items: [
+      { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { name: "Resources", href: "/admin/resources", icon: FileText },
+    ],
+  },
+  {
+    group: "Engagement",
+    items: [
+      { name: "Messages", href: "/admin/contacts", icon: MessageCircleIcon },
+      { name: "Leads", href: "/admin/leads", icon: Users },
+    ],
+  },
+  {
+    group: "Management",
+    items: [
+      { name: "Content Management", href: "/admin/content", icon: Edit3 },
+      { name: "Settings", href: "/admin/settings", icon: Settings },
+    ],
+  },
 ];
 
 interface AdminSidebarProps {
@@ -38,40 +55,42 @@ export function AdminSidebar({ onNavigate }: AdminSidebarProps) {
 
       <nav className="flex flex-1 flex-col">
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
-          <li>
-            <ul role="list" className="-mx-2 space-y-1">
-              {navigation.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/admin" && pathname.startsWith(item.href));
+          {navigation.map((section) => (
+            <li key={section.group}>
+              <ul role="list" className="-mx-2 space-y-1">
+                {section.items.map((item) => {
+                  const isActive =
+                    pathname === item.href ||
+                    (item.href !== "/admin" && pathname.startsWith(item.href));
 
-                return (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      onClick={onNavigate}
-                      className={cn(
-                        "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors",
-                        isActive
-                          ? "bg-[#3f79ff] text-white"
-                          : "text-gray-300 hover:text-white hover:bg-gray-800"
-                      )}
-                    >
-                      <item.icon
+                  return (
+                    <li key={item.name}>
+                      <Link
+                        href={item.href}
+                        onClick={onNavigate}
                         className={cn(
-                          "h-6 w-6 shrink-0",
+                          "group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold transition-colors",
                           isActive
-                            ? "text-white"
-                            : "text-gray-400 group-hover:text-white"
+                            ? "bg-[#3f79ff] text-white"
+                            : "text-gray-300 hover:text-white hover:bg-gray-800"
                         )}
-                      />
-                      {item.name}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </li>
+                      >
+                        <item.icon
+                          className={cn(
+                            "h-6 w-6 shrink-0",
+                            isActive
+                              ? "text-white"
+                              : "text-gray-400 group-hover:text-white"
+                          )}
+                        />
+                        {item.name}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </li>
+          ))}
         </ul>
       </nav>
     </div>
