@@ -12,7 +12,7 @@
   "dependencies": {
     "@clerk/nextjs": "latest",
     "@hookform/resolvers": "^3.9.1",
-    "@next/third-parties": "^15.5.2",
+    "@next/third-parties": "latest",
     "@prisma/client": "latest",
     "@radix-ui/react-accordion": "latest",
     "@radix-ui/react-alert-dialog": "latest",

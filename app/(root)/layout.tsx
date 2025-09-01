@@ -6,8 +6,6 @@ import Header from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ClerkProvider } from "@clerk/nextjs";
 
-import { GoogleAnalytics } from "@next/third-parties/google";
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
