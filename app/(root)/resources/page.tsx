@@ -68,7 +68,7 @@ export default async function ResourcesPage({
     search,
     category,
     page,
-    perPage: 1, // or 6 or any number
+    perPage: 6, // or 6 or any number
   });
 
   return (
