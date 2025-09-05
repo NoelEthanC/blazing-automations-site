@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
+import { getCurrentUser, requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
@@ -388,7 +388,8 @@ async function uploadFile(file: File, bucket: string, pathPrefix = "") {
 // }
 export async function createResource(prevState: any, formData: FormData) {
   try {
-    const user = await requireAdmin();
+    const user = await getCurrentUser();
+    await requireAdmin();
 
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
