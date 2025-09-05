@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { writeFile, mkdir } from "fs/promises";
+import { writeFile, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import { nanoid } from "nanoid";
 import { ResourceCategory } from "@prisma/client";
@@ -305,9 +305,89 @@ async function uploadFile(file: File, bucket: string, pathPrefix = "") {
 }
 
 // Admin: Create new resource
+// export async function createResource(prevState: any, formData: FormData) {
+//   try {
+//     // throw new Error("This function is not implemented yet");
+//     const user = await requireAdmin();
+
+//     const title = formData.get("title") as string;
+//     const description = formData.get("description") as string;
+//     const longDescription = formData.get("longDescription") as string;
+//     const category = formData.get("category") as string;
+//     const tool = formData.get("tool") as string;
+//     const hasGuide = formData.get("hasGuide") === "on";
+//     const guideUrl = formData.get("guideUrl") as string;
+//     const featured = formData.get("featured") === "on";
+//     const published = formData.get("published") === "on";
+
+//     // Handle file uploads
+//     const thumbnailFile = formData.get("thumbnail") as File;
+//     const resourceFile = formData.get("resourceFile") as File;
+
+//     let thumbnailPath = null;
+//     let filePath = null;
+
+//     // Upload thumbnail
+//     if (thumbnailFile && thumbnailFile.size > 0) {
+//       thumbnailPath = await uploadFile(thumbnailFile, "thumbnails", "thumb");
+//     }
+
+//     // Upload resource file
+//     if (resourceFile && resourceFile.size > 0) {
+//       const resourceDir = join(process.cwd(), "public", "uploads", "resources");
+//       await mkdir(resourceDir, { recursive: true });
+
+//       const resourceExt = resourceFile.name.split(".").pop();
+//       const resourceName = `${title} TEMPLATE.${resourceExt}`;
+//       const resourceFullPath = join(resourceDir, resourceName);
+
+//       const resourceBuffer = Buffer.from(await resourceFile.arrayBuffer());
+//       await writeFile(resourceFullPath, resourceBuffer);
+
+//       filePath = `/uploads/resources/${resourceName}`;
+//     }
+
+//     // Generate slug
+//     const slug = title
+//       .toLowerCase()
+//       .replace(/[^a-z0-9]+/g, "-")
+//       .replace(/(^-|-$)/g, "");
+
+//     // Create resource
+//     const resource = await prisma.resource.create({
+//       data: {
+//         title,
+//         slug,
+//         description,
+//         longDescription: longDescription || null,
+//         category: category as ResourceCategory,
+//         tool: tool || null,
+//         hasGuide,
+//         guideUrl: guideUrl || null,
+//         featured,
+//         published,
+//         thumbnail: thumbnailPath,
+//         filePath,
+//         fileType: resourceFile?.type || null,
+//         authorId: user.id,
+//       },
+//     });
+
+//     revalidatePath("/admin/resources");
+//     revalidatePath("/resources");
+//     revalidatePath("/");
+
+//     return { success: true, resourceId: resource.id };
+//   } catch (error) {
+//     console.error("Failed to create resource:", error);
+//     return {
+//       success: false,
+//       error: `"Failed to create resource. Please try again."${error}`,
+//     };
+//   }
+// }
 export async function createResource(prevState: any, formData: FormData) {
   try {
-    // throw new Error("This function is not implemented yet");
     const user = await requireAdmin();
 
     const title = formData.get("title") as string;
@@ -320,47 +400,30 @@ export async function createResource(prevState: any, formData: FormData) {
     const featured = formData.get("featured") === "on";
     const published = formData.get("published") === "on";
 
-    // Handle file uploads
     const thumbnailFile = formData.get("thumbnail") as File;
     const resourceFile = formData.get("resourceFile") as File;
 
     let thumbnailPath = null;
     let filePath = null;
+    let fileType = null;
 
     // Upload thumbnail
     if (thumbnailFile && thumbnailFile.size > 0) {
-      // const thumbnailDir = join(
-      //   process.cwd(),
-      //   "public",
-      //   "uploads",
-      //   "thumbnails"
-      // );
-      // await mkdir(thumbnailDir, { recursive: true });
-
-      // const thumbnailExt = thumbnailFile.name.split(".").pop();
-      // const thumbnailName = `${nanoid()}.${thumbnailExt}`;
-      // const thumbnailFullPath = join(thumbnailDir, thumbnailName);
-
-      // const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
-      // await writeFile(thumbnailFullPath, thumbnailBuffer);
-
-      // thumbnailPath = `/uploads/thumbnails/${thumbnailName}`;
-      thumbnailPath = await uploadFile(thumbnailFile, "thumbnails", "thumb");
+      thumbnailPath = await uploadFile(
+        thumbnailFile,
+        "thumbnails",
+        `thumb-${Date.now()}`
+      );
     }
 
     // Upload resource file
     if (resourceFile && resourceFile.size > 0) {
-      const resourceDir = join(process.cwd(), "public", "uploads", "resources");
-      await mkdir(resourceDir, { recursive: true });
-
-      const resourceExt = resourceFile.name.split(".").pop();
-      const resourceName = `${title} TEMPLATE.${resourceExt}`;
-      const resourceFullPath = join(resourceDir, resourceName);
-
-      const resourceBuffer = Buffer.from(await resourceFile.arrayBuffer());
-      await writeFile(resourceFullPath, resourceBuffer);
-
-      filePath = `/uploads/resources/${resourceName}`;
+      filePath = await uploadFile(
+        resourceFile,
+        "resources",
+        `res-${Date.now()}`
+      );
+      fileType = resourceFile.type;
     }
 
     // Generate slug
@@ -369,7 +432,7 @@ export async function createResource(prevState: any, formData: FormData) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
-    // Create resource
+    // Save in DB
     const resource = await prisma.resource.create({
       data: {
         title,
@@ -384,8 +447,8 @@ export async function createResource(prevState: any, formData: FormData) {
         published,
         thumbnail: thumbnailPath,
         filePath,
-        fileType: resourceFile?.type || null,
-        authorId: user.id,
+        fileType,
+        authorId: user?.id,
       },
     });
 
@@ -398,7 +461,7 @@ export async function createResource(prevState: any, formData: FormData) {
     console.error("Failed to create resource:", error);
     return {
       success: false,
-      error: `"Failed to create resource. Please try again."${error}`,
+      error: `Failed to create resource. Please try again. ${error}`,
     };
   }
 }
@@ -422,9 +485,15 @@ export async function updateResource(
     const featured = formData.get("featured") === "on";
     const published = formData.get("published") === "on";
 
-    // Handle file uploads
     const thumbnailFile = formData.get("thumbnail") as File;
     const resourceFile = formData.get("resourceFile") as File;
+
+    // Fetch current resource to delete old files
+    const currentResource = await prisma.resource.findUnique({
+      where: { id: resourceId },
+    });
+
+    if (!currentResource) throw new Error("Resource not found");
 
     const updateData: any = {
       title,
@@ -438,44 +507,30 @@ export async function updateResource(
       published,
     };
 
-    // Upload new thumbnail if provided
+    // Handle thumbnail update
     if (thumbnailFile && thumbnailFile.size > 0) {
-      // const thumbnailDir = join(
-      //   process.cwd(),
-      //   "public",
-      //   "uploads",
-      //   "thumbnails"
-      // );
-      // await mkdir(thumbnailDir, { recursive: true });
-
-      // const thumbnailExt = thumbnailFile.name.split(".").pop();
-      // const thumbnailName = `${nanoid()}.${thumbnailExt}`;
-      // const thumbnailFullPath = join(thumbnailDir, thumbnailName);
-
-      // const thumbnailBuffer = Buffer.from(await thumbnailFile.arrayBuffer());
-      // await writeFile(thumbnailFullPath, thumbnailBuffer);
-
+      if (currentResource.thumbnail) {
+        await deleteFile(currentResource.thumbnail);
+      }
       const thumbnailPath = await uploadFile(
         thumbnailFile,
         "thumbnails",
-        "thumb"
+        `thumb-${Date.now()}`
       );
       updateData.thumbnail = thumbnailPath;
     }
 
-    // Upload new resource file if provided
+    // Handle resource file update
     if (resourceFile && resourceFile.size > 0) {
-      const resourceDir = join(process.cwd(), "public", "uploads", "resources");
-      await mkdir(resourceDir, { recursive: true });
-
-      const resourceExt = resourceFile.name.split(".").pop();
-      const resourceName = `${nanoid()}.${resourceExt}`;
-      const resourceFullPath = join(resourceDir, resourceName);
-
-      const resourceBuffer = Buffer.from(await resourceFile.arrayBuffer());
-      await writeFile(resourceFullPath, resourceBuffer);
-
-      updateData.filePath = `/uploads/resources/${resourceName}`;
+      if (currentResource.filePath) {
+        await deleteFile(currentResource.filePath);
+      }
+      const resourcePath = await uploadFile(
+        resourceFile,
+        "resources",
+        `res-${Date.now()}`
+      );
+      updateData.filePath = resourcePath;
       updateData.fileType = resourceFile.type;
     }
 
@@ -562,5 +617,30 @@ export async function toggleResourceStatus(
       success: false,
       error: "Failed to update resource status.",
     };
+  }
+}
+
+// Handles deleting files both in local /public/uploads and Supabase
+async function deleteFile(filePath: string) {
+  try {
+    if (!filePath) return;
+
+    // Case 1: Local file in public/uploads
+    if (filePath.startsWith("/uploads/")) {
+      const fullPath = join(process.cwd(), "public", filePath);
+      await unlink(fullPath).catch(() => {}); // ignore if missing
+      return;
+    }
+
+    // Case 2: Supabase public URL
+    const url = new URL(filePath);
+    const parts = url.pathname.split("/");
+    const bucket = parts[2]; // after /storage/v1/object/public/<bucket>/
+    const fileName = parts.slice(3).join("/");
+
+    const { error } = await supabase.storage.from(bucket).remove([fileName]);
+    if (error) throw error;
+  } catch (err) {
+    console.error("Failed to delete file:", err);
   }
 }

@@ -1,8 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyDownloadToken } from "@/lib/download-utils";
 import { prisma } from "@/lib/prisma";
-import { readFile } from "fs/promises";
-import { join } from "path";
 
 export async function GET(
   request: NextRequest,
@@ -30,14 +28,19 @@ export async function GET(
       return new NextResponse("Resource not found", { status: 404 });
     }
 
-    // Read file from public directory
-    const filePath = join(process.cwd(), "public", resource.filePath);
-    const fileBuffer = await readFile(filePath);
+    // Fetch file directly from Supabase URL
+    const response = await fetch(resource.filePath);
 
-    // Determine content type
+    if (!response.ok) {
+      return new NextResponse("Failed to fetch file from storage", {
+        status: 500,
+      });
+    }
+
+    const fileBuffer = Buffer.from(await response.arrayBuffer());
+
+    // Use saved fileType, fallback to generic
     const contentType = resource.fileType || "application/octet-stream";
-
-    // Extract filename from path
     const filename = resource.filePath.split("/").pop() || "download";
 
     return new NextResponse(fileBuffer, {
