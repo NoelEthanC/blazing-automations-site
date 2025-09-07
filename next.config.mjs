@@ -23,23 +23,35 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+
   images: {
     unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "https://leztukzsuvtyieoxidsi.supabase.co",
+        hostname: "leztukzsuvtyieoxidsi.supabase.co",
         pathname: "/storage/v1/object/public/**",
       },
     ],
   },
+
   experimental: {
     serverActions: {
-      bodySizeLimit: "5mb",
+      bodySizeLimit: "10mb",
     },
   },
 
   allowedDevOrigins: ["local-origin.dev", "*.local-origin.dev"],
+
+  // Add custom headers here
+  async headers() {
+    return [
+      {
+        source: "/(.*)", // Apply to all routes
+        headers: [{ key: "X-Robots-Tag", value: "index, follow" }],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
