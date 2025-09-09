@@ -20,6 +20,7 @@ model User {
   // Relations
   resources          Resource[]
   contactSubmissions ContactSubmission[]
+  blogPosts          BlogPost[]
 
   @@map("users")
 }
@@ -120,6 +121,34 @@ model SiteSetting {
   @@map("site_settings")
 }
 
+model BlogPost {
+  id              String        @id @default(cuid())
+  title           String
+  slug            String        @unique
+  excerpt         String?       @db.Text
+  content         String        @db.LongText
+  thumbnail       String?
+  videoUrl        String?
+  category        BlogCategory
+  tags            String?       @db.Text
+  featured        Boolean       @default(false)
+  published       Boolean       @default(false)
+  publishedAt     DateTime?
+  readingTime     Int?
+  viewsCount      Int           @default(0)
+  seoTitle        String?
+  seoDescription  String?       @db.Text
+  seoKeywords     String?       @db.Text
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("blog_posts")
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -146,4 +175,10 @@ enum ContactStatus {
   IN_PROGRESS
   RESOLVED
   CLOSED
+}
+
+enum BlogCategory {
+  TUTORIALS_GUIDES
+  CASE_STUDIES
+  SYSTEM_PROMPTS
 }

@@ -1,0 +1,3 @@
+-- Generate Prisma Client
+-- Run: npx prisma generate
+-- This will create the @prisma/client module
