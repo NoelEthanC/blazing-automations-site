@@ -38,3 +38,4 @@ next-env.d.ts
 /.clerk/
 =======
 >>>>>>> 35b07f174db01c5a71affe1bcd0380b11c8a0fba
+.env
