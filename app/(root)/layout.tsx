@@ -6,12 +6,13 @@ import { ThemeProvider } from "@/components/theme-provider";
 import Header from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import "../globals.css";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: {
-    default: "Blazing Automations - Premium Automation Templates & Resources",
+    default: "Blazing Automations - AI Automation & Web Solutions",
     template: "%s | Blazing Automations",
   },
   description:
@@ -21,9 +22,20 @@ export const metadata: Metadata = {
     "make.com",
     "zapier",
     "n8n",
-    "templates",
+    "make money online",
+    "ai agent",
     "workflows",
     "business automation",
+    "AI automation",
+    "web development",
+    "social media automation",
+    "automation consulting",
+    "workflow optimization",
+    "integration services",
+    "automation tools",
+    "digital transformation",
+    "ai automation",
+    "youtube automation",
   ],
   authors: [{ name: "Blazing Automations" }],
   creator: "Blazing Automations",
@@ -42,7 +54,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     url: "https://blazingautomations.com",
     siteName: "Blazing Automations",
-    title: "Blazing Automations - Premium Automation Templates & Resources",
+    title: "Blazing Automations -  AI Automation & Web Solutions",
     description:
       "Transform your business with premium Make.com, Zapier, and n8n automation templates. Save hours of setup time with our professionally crafted workflows.",
     images: [
@@ -60,7 +72,7 @@ export const metadata: Metadata = {
     description:
       "Transform your business with premium Make.com, Zapier, and n8n automation templates. Save hours of setup time with our professionally crafted workflows.",
     images: ["/opengraph-image.png"],
-    creator: "@blazingautomations",
+    creator: "@noelethan_dev",
   },
   robots: {
     index: true,
@@ -99,6 +111,9 @@ export default function RootLayout({
               <Footer />
             </div>
           </ThemeProvider>
+          {process.env.NEXT_PUBLIC_GA_ID && (
+            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
+          )}
         </body>
       </html>
     </ClerkProvider>

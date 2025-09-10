@@ -14,6 +14,8 @@ import { Inter } from "next/font/google";
 
 const inter = Inter({ subsets: ["latin"] });
 
+// add the nextjs metadata fro the dashboard here if needed
+
 export default function AdminRootLayout({
   children,
 }: {
