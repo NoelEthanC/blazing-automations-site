@@ -18,6 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+      <meta name='impact-site-verification' value='04962437-f4b9-4c13-8024-fe891c0f7fc3'>
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
