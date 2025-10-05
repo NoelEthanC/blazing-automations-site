@@ -285,7 +285,7 @@ export async function getAllResources() {
   }
 }
 
-async function uploadFile(file: File, bucket: string, pathPrefix = "") {
+export async function uploadFile(file: File, bucket: string, pathPrefix = "") {
   const fileExt = file.name.split(".").pop();
   const fileName = `${pathPrefix}-${Date.now()}.${fileExt}`;
 

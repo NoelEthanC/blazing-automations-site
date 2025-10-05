@@ -1,21 +1,24 @@
-import { getBlogPostForEdit } from "@/app/actions/blog"
-import { BlogForm } from "@/components/admin/blog-form"
-import { Button } from "@/components/ui/button"
-import { ArrowLeft } from "lucide-react"
-import Link from "next/link"
-import { notFound } from "next/navigation"
+import { getBlogPostForEdit } from "@/app/actions/blog";
+import { BlogForm } from "@/components/admin/lexical-blog-form";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 
 interface EditBlogPostPageProps {
   params: {
-    id: string
-  }
+    id: string;
+  };
 }
 
-export default async function EditBlogPostPage({ params }: EditBlogPostPageProps) {
-  const post = await getBlogPostForEdit(params.id)
+export default async function EditBlogPostPage({
+  params,
+}: EditBlogPostPageProps) {
+  const { id } = await params;
+  const post = await getBlogPostForEdit(id);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
   return (
@@ -35,5 +38,5 @@ export default async function EditBlogPostPage({ params }: EditBlogPostPageProps
 
       <BlogForm post={post} />
     </div>
-  )
+  );
 }

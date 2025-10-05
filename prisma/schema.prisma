@@ -53,8 +53,12 @@ model Resource {
 }
 
 model ResourceDownload {
-  id        String                 @id @default(cuid())
-  email     String
+  id     String     @id @default(cuid())
+  email  String
+  // two added fields for name and status
+  name   String     @default("mate")
+  status LeadStatus @default(PENDING)
+
   action    ResourceDownloadAction
   createdAt DateTime               @default(now())
   expiresAt DateTime?              @default(dbgenerated("DATE_ADD(NOW(), INTERVAL 1 DAY)"))
@@ -65,6 +69,19 @@ model ResourceDownload {
   resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
   @@map("resource_downloads")
+}
+
+model Lead {
+  id          String     @id @default(cuid())
+  name        String?
+  email       String
+  token       String     @unique
+  tokenExpiry DateTime
+  status      LeadStatus @default(PENDING)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("leads")
 }
 
 model ContactSubmission {
@@ -122,29 +139,29 @@ model SiteSetting {
 }
 
 model BlogPost {
-  id              String        @id @default(cuid())
-  title           String
-  slug            String        @unique
-  excerpt         String?       @db.Text
-  content         String        @db.LongText
-  thumbnail       String?
-  videoUrl        String?
-  category        BlogCategory
-  tags            String?       @db.Text
-  featured        Boolean       @default(false)
-  published       Boolean       @default(false)
-  publishedAt     DateTime?
-  readingTime     Int?
-  viewsCount      Int           @default(0)
-  seoTitle        String?
-  seoDescription  String?       @db.Text
-  seoKeywords     String?       @db.Text
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id             String        @id @default(cuid())
+  title          String?
+  slug           String?       @unique
+  excerpt        String?       @db.Text
+  content        String?       @db.LongText
+  thumbnail      String?
+  videoUrl       String?
+  category       BlogCategory? @default(TUTORIALS_GUIDES)
+  tags           String?       @db.Text
+  featured       Boolean?      @default(false)
+  published      Boolean?      @default(false)
+  publishedAt    DateTime?
+  readingTime    Int?          @default(0)
+  viewsCount     Int?          @default(0)
+  seoTitle       String?
+  seoDescription String?       @db.Text
+  seoKeywords    String?       @db.Text
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
 
   // Relations
-  authorId String
-  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId String?
+  author   User?   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
   @@map("blog_posts")
 }
@@ -181,4 +198,9 @@ enum BlogCategory {
   TUTORIALS_GUIDES
   CASE_STUDIES
   SYSTEM_PROMPTS
+}
+
+enum LeadStatus {
+  PENDING
+  CONFIRMED
 }

@@ -66,11 +66,16 @@ export async function getLeads({
         firstDownload: Date;
         lastDownload: Date;
         resources: Set<string>;
+        status?: string;
       }
     >();
 
     downloads.forEach((download) => {
       const email = download.email;
+      const status = download.status;
+      if (status !== "CONFIRMED") {
+        return; // Skip non-confirmed downloads
+      }
       const existing = emailMap.get(email);
 
       if (existing) {
