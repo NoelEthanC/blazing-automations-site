@@ -8,66 +8,60 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  clerkId   String   @unique
-  email     String   @unique
-  firstName String?
-  lastName  String?
-  role      UserRole @default(USER)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  resources          Resource[]
-  contactSubmissions ContactSubmission[]
+  id                 String              @id @default(cuid())
+  clerkId            String              @unique
+  email              String              @unique
+  firstName          String?
+  lastName           String?
+  role               UserRole            @default(USER)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   blogPosts          BlogPost[]
+  contactSubmissions ContactSubmission[]
+  resources          Resource[]
 
   @@map("users")
 }
 
 model Resource {
-  id              String           @id @default(cuid())
+  id              String             @id @default(cuid())
   title           String
-  slug            String           @unique
-  description     String           @db.Text
-  longDescription String?          @db.Text
+  slug            String             @unique
+  description     String             @db.Text
+  longDescription String?            @db.Text
   thumbnail       String?
   filePath        String?
   fileType        String?
   tool            String?
   category        ResourceCategory
-  hasGuide        Boolean          @default(false)
+  hasGuide        Boolean            @default(false)
   guideUrl        String?
-  featured        Boolean          @default(false)
-  published       Boolean          @default(false)
-  downloadsCount  Int              @default(0)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+  featured        Boolean            @default(false)
+  published       Boolean            @default(false)
+  downloadsCount  Int                @default(0)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  authorId        String
+  downloads       ResourceDownload[]
+  author          User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // Relations
-  authorId  String
-  author    User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  downloads ResourceDownload[]
-
+  @@index([authorId], map: "resources_authorId_fkey")
   @@map("resources")
 }
 
 model ResourceDownload {
-  id     String     @id @default(cuid())
-  email  String
-  // two added fields for name and status
-  name   String     @default("mate")
-  status LeadStatus @default(PENDING)
-
-  action    ResourceDownloadAction
-  createdAt DateTime               @default(now())
-  expiresAt DateTime?              @default(dbgenerated("DATE_ADD(NOW(), INTERVAL 1 DAY)"))
-  token     String                 @unique
-
-  // Relations
+  id         String                 @id @default(cuid())
+  email      String
+  action     ResourceDownloadAction
+  createdAt  DateTime               @default(now())
+  expiresAt  DateTime?              @default(dbgenerated("(current_timestamp() + interval 1 day)"))
+  token      String                 @unique
   resourceId String
-  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  name       String                 @default("mate")
+  status     LeadStatus             @default(PENDING)
+  resource   Resource               @relation(fields: [resourceId], references: [id], onDelete: Cascade)
 
+  @@index([resourceId], map: "resource_downloads_resourceId_fkey")
   @@map("resource_downloads")
 }
 
@@ -93,11 +87,10 @@ model ContactSubmission {
   status    ContactStatus @default(NEW)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
+  userId    String?
+  user      User?         @relation(fields: [userId], references: [id])
 
-  // Relations
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
-
+  @@index([userId], map: "contact_submissions_userId_fkey")
   @@map("contact_submissions")
 }
 
@@ -120,7 +113,7 @@ model SiteContent {
   key       String   @unique
   title     String?
   content   String   @db.Text
-  metadata  Json?
+  metadata  String?  @db.LongText
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -158,11 +151,10 @@ model BlogPost {
   seoKeywords    String?       @db.Text
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  authorId       String?
+  author         User?         @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  // Relations
-  authorId String?
-  author   User?   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
+  @@index([authorId], map: "blog_posts_authorId_fkey")
   @@map("blog_posts")
 }
 
