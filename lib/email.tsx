@@ -23,7 +23,6 @@ export async function sendEmail({ to, subject, from, props }: EmailOptions) {
       // from: from || process.env.FROM_EMAIL || "delivered@gmail.com",
       from: "Blazing Automations <contact@blazingautomations.com>",
       to: [to],
-      // to: "noelchiwamba1@gmail.com",
       subject: subject,
       react: (
         <DownloadEmail

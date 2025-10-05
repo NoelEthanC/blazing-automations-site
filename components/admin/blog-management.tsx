@@ -129,8 +129,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                     )}
                   </div>
                   <div className="text-sm text-gray-400 mt-1">
-                    {post.readingTime} min read • {post.author.firstName}{" "}
-                    {post.author.lastName}
+                    {post.readingTime} min read • {post.author.name}{" "}
                   </div>
                 </div>
               </TableCell>

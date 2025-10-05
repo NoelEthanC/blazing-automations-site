@@ -66,7 +66,8 @@ export async function getLeads({
         firstDownload: Date;
         lastDownload: Date;
         resources: Set<string>;
-        status?: string;
+        status: string;
+        name: string;
       }
     >();
 
@@ -95,6 +96,8 @@ export async function getLeads({
         if (download.resource?.title) {
           existing.resources.add(download.resource.title);
         }
+        existing.status = existing.status ?? download.status;
+        existing.name = existing.name ?? download.name;
       } else {
         emailMap.set(email, {
           downloadCount: 1,
@@ -103,6 +106,8 @@ export async function getLeads({
           resources: new Set(
             download.resource?.title ? [download.resource.title] : []
           ),
+          status: download.status,
+          name: download.name,
         });
       }
     });
@@ -114,6 +119,8 @@ export async function getLeads({
         downloadCount: data.downloadCount,
         firstDownload: data.firstDownload,
         lastDownload: data.lastDownload,
+        status: data.status,
+        name: data.name ?? "--",
         resources: Array.from(data.resources),
       }))
       .sort((a, b) => b.lastDownload.getTime() - a.lastDownload.getTime());
@@ -162,6 +169,7 @@ export async function exportLeadsToCSV(): Promise<{
 
     // Create CSV headers
     const headers = [
+      "Name",
       "Email",
       "Download Count",
       "First Download",
@@ -171,6 +179,7 @@ export async function exportLeadsToCSV(): Promise<{
 
     // Create CSV rows
     const rows = leads.map((lead) => [
+      lead.name,
       lead.email,
       lead.downloadCount.toString(),
       lead.firstDownload.toISOString(),

@@ -24,12 +24,15 @@ import {
 import { Download, Search, Users, FileDown } from "lucide-react";
 import { getLeads, exportLeadsToCSV } from "@/app/actions/leads";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface Lead {
   email: string;
   downloadCount: number;
   firstDownload: Date;
   lastDownload: Date;
+  name?: string;
+  status?: string;
   resources: string[];
 }
 
@@ -122,16 +125,20 @@ export function LeadsManagement() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 text-white">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-gray-800/50 border-gray-700">
+        <Card className="bg-gray-800/50 border-gray-700 ">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm text-white font-medium">
+              Total Leads
+            </CardTitle>
+            <Users className="h-4 w-4 text-secondary-blue/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{leadsData.total}</div>
+            <div className="text-2xl font-bold text-white">
+              {leadsData.total}
+            </div>
             <p className="text-xs text-muted-foreground">
               Unique email addresses
             </p>
@@ -140,13 +147,13 @@ export function LeadsManagement() {
 
         <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-white">
               Total Downloads
             </CardTitle>
-            <Download className="h-4 w-4 text-muted-foreground" />
+            <Download className="h-4 w-4 text-secondary-blue/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {leadsData.leads.reduce(
                 (sum, lead) => sum + lead.downloadCount,
                 0
@@ -160,11 +167,13 @@ export function LeadsManagement() {
 
         <Card className="bg-gray-800/50 border-gray-700">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Avg Downloads</CardTitle>
-            <FileDown className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-white">
+              Avg Downloads
+            </CardTitle>
+            <FileDown className="h-4 w-4 text-secondary-blue/80" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-2xl font-bold text-white">
               {leadsData.total > 0
                 ? (
                     leadsData.leads.reduce(
@@ -183,11 +192,11 @@ export function LeadsManagement() {
       <Card className="bg-gray-800/50 border-gray-700">
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>Leads List</CardTitle>
+            <CardTitle className="text-white">Leads List</CardTitle>
             <Button
               onClick={handleExport}
               disabled={exporting || leadsData.total === 0}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 bg-secondary-blue"
             >
               <Download className="h-4 w-4" />
               {exporting ? "Exporting..." : "Export CSV"}
@@ -239,21 +248,46 @@ export function LeadsManagement() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Downloads</TableHead>
+                    <TableHead>Status</TableHead>
                     <TableHead>First Download</TableHead>
                     <TableHead>Last Download</TableHead>
                     <TableHead>Resources</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
+                <TableBody className="text-white">
                   {leadsData.leads.map((lead) => (
-                    <TableRow key={lead.email}>
+                    <TableRow
+                      className="hover:bg-secondary-blue/20"
+                      key={lead.email}
+                    >
+                      <TableCell className="font-medium uppercase w-fit">
+                        {lead?.name ? lead?.name : "—"}
+                      </TableCell>
                       <TableCell className="font-medium">
                         {lead.email}
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{lead.downloadCount}</Badge>
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        <Badge
+                          className={cn(
+                            "text-white border-0 outline-none",
+                            lead.status === "CONFIRMED"
+                              ? "  bg-green-600"
+                              : "text-red-500 outline-none"
+                          )}
+                          variant={
+                            lead.status === "CONFIRMED"
+                              ? "warning"
+                              : "destructive"
+                          }
+                        >
+                          {lead.status ? lead.status : "—"}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(lead.firstDownload)}
@@ -267,13 +301,16 @@ export function LeadsManagement() {
                             <Badge
                               key={index}
                               variant="outline"
-                              className="text-xs"
+                              className="text-xs text-gray-300"
                             >
                               {resource}
                             </Badge>
                           ))}
                           {lead.resources.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
+                            <Badge
+                              variant="outline"
+                              className="text-xs text-gray-200"
+                            >
                               +{lead.resources.length - 2} more
                             </Badge>
                           )}
