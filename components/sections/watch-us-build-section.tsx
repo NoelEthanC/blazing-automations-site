@@ -63,7 +63,7 @@ export function WatchUsBuildSection() {
                   <Link
                     target="_blank"
                     className="flex items-center justify-center gap-2 font-bold"
-                    href="https://www.youtube.com/@BlazingAutomations"
+                    href="https://www.youtube.com/@blazingautomations"
                   >
                     Subscribe • Free Content
                     <ExternalLink className="ml-2 h-4 w-4" />

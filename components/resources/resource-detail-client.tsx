@@ -10,6 +10,7 @@ import { DownloadModal } from "./download-modal";
 import { Download, ChevronRight, Play, FileText, Tag } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 import { events } from "@/lib/eventRegistry";
+import { useSearchParams } from "next/navigation";
 
 interface ResourceDetailClientProps {
   resource: {
@@ -47,14 +48,20 @@ export function ResourceDetailClient({
   relatedResources,
 }: ResourceDetailClientProps) {
   const [isDownloadModalOpen, setIsDownloadModalOpen] = useState(false);
-
+  const [downloadToken, setDownloadToken] = useState<string | null>(null);
+  const searchParams = useSearchParams();
   // Track resource view on mount
   useEffect(() => {
-    trackEvent(...Object.values(events.resources.view(resource.slug)));
-  }, [resource.slug]);
+    const token = searchParams.get("download_token");
+    if (token) {
+      setIsDownloadModalOpen(true);
+      setDownloadToken(token);
+    }
+  }, [resource.slug, searchParams]);
 
   const handleDownloadClick = () => {
     setIsDownloadModalOpen(true);
+    setDownloadToken(null); // manual click doesn’t need token
     trackEvent(...Object.values(events.resources.download(resource.slug)));
   };
 
@@ -241,6 +248,7 @@ export function ResourceDetailClient({
         onClose={() => setIsDownloadModalOpen(false)}
         resourceTitle={resource.title}
         resourceSlug={resource.slug}
+        downloadToken={downloadToken}
       />
     </main>
   );

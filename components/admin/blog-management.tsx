@@ -1,77 +1,104 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { deleteBlogPost, toggleBlogPostStatus } from "@/app/actions/blog"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Edit, Trash2, Eye, EyeOff, Star, StarOff } from "lucide-react"
-import Link from "next/link"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import { useState } from "react";
+import { deleteBlogPost, toggleBlogPostStatus } from "@/app/actions/blog";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Star,
+  StarOff,
+} from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const categoryLabels = {
   TUTORIALS_GUIDES: "Tutorials & Guides",
   CASE_STUDIES: "Case Studies",
   SYSTEM_PROMPTS: "System Prompts",
-}
+};
 
 interface BlogManagementProps {
-  posts: any[]
+  posts: any[];
 }
 
 export function BlogManagement({ posts }: BlogManagementProps) {
-  const router = useRouter()
-  const [loading, setLoading] = useState<string | null>(null)
+  const router = useRouter();
+  const [loading, setLoading] = useState<string | null>(null);
 
-  const handleToggleStatus = async (postId: string, field: "published" | "featured") => {
-    setLoading(postId)
+  const handleToggleStatus = async (
+    postId: string,
+    field: "published" | "featured"
+  ) => {
+    setLoading(postId);
     try {
-      const result = await toggleBlogPostStatus(postId, field)
+      const result = await toggleBlogPostStatus(postId, field);
       if (result.success) {
-        toast.success(`Post ${field} status updated successfully`)
-        router.refresh()
+        toast.success(`Post ${field} status updated successfully`);
+        router.refresh();
       } else {
-        toast.error(result.error || "Failed to update post status")
+        toast.error(result.error || "Failed to update post status");
       }
     } catch (error) {
-      toast.error("Failed to update post status")
+      toast.error("Failed to update post status");
     } finally {
-      setLoading(null)
+      setLoading(null);
     }
-  }
+  };
 
   const handleDelete = async (postId: string) => {
-    if (!confirm("Are you sure you want to delete this blog post?")) return
+    if (!confirm("Are you sure you want to delete this blog post?")) return;
 
-    setLoading(postId)
+    setLoading(postId);
     try {
-      const result = await deleteBlogPost(postId)
+      const result = await deleteBlogPost(postId);
       if (result.success) {
-        toast.success("Blog post deleted successfully")
-        router.refresh()
+        toast.success("Blog post deleted successfully");
+        router.refresh();
       } else {
-        toast.error(result.error || "Failed to delete blog post")
+        toast.error(result.error || "Failed to delete blog post");
       }
     } catch (error) {
-      toast.error("Failed to delete blog post")
+      toast.error("Failed to delete blog post");
     } finally {
-      setLoading(null)
+      setLoading(null);
     }
-  }
+  };
 
   if (posts.length === 0) {
     return (
       <div className="text-center py-12 bg-gray-800/50 rounded-xl">
         <div className="text-6xl mb-4">📝</div>
-        <h3 className="text-xl font-semibold text-white mb-2">No blog posts yet</h3>
-        <p className="text-gray-400 mb-6">Create your first blog post to get started.</p>
+        <h3 className="text-xl font-semibold text-white mb-2">
+          No blog posts yet
+        </h3>
+        <p className="text-gray-400 mb-6">
+          Create your first blog post to get started.
+        </p>
         <Button asChild className="bg-[#3f79ff] hover:bg-[#3f79ff]/80">
           <Link href="/admin/blog/new">Create First Post</Link>
         </Button>
       </div>
-    )
+    );
   }
 
   return (
@@ -89,20 +116,29 @@ export function BlogManagement({ posts }: BlogManagementProps) {
         </TableHeader>
         <TableBody>
           {posts.map((post) => (
-            <TableRow key={post.id} className="border-gray-700">
+            <TableRow
+              key={post.id}
+              className="border-gray-700 hover:bg-midnight-blue/80"
+            >
               <TableCell>
                 <div>
                   <div className="font-medium text-white flex items-center gap-2">
                     {post.title}
-                    {post.featured && <Star className="h-4 w-4 text-[#fcbf5b] fill-current" />}
+                    {post.featured && (
+                      <Star className="h-4 w-4 text-[#fcbf5b] fill-current" />
+                    )}
                   </div>
                   <div className="text-sm text-gray-400 mt-1">
-                    {post.readingTime} min read • {post.author.firstName} {post.author.lastName}
+                    {post.readingTime} min read • {post.author.firstName}{" "}
+                    {post.author.lastName}
                   </div>
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary" className="bg-[#3f79ff]/20 text-[#3f79ff] border-[#3f79ff]/30">
+                <Badge
+                  variant="secondary"
+                  className="bg-[#3f79ff]/20 text-[#3f79ff] border-[#3f79ff]/30"
+                >
                   {categoryLabels[post.category]}
                 </Badge>
               </TableCell>
@@ -121,20 +157,33 @@ export function BlogManagement({ posts }: BlogManagementProps) {
               </TableCell>
               <TableCell>
                 <span className="text-gray-400 text-sm">
-                  {post.publishedAt ? post.publishedAt.toLocaleDateString() : "Not published"}
+                  {post.publishedAt
+                    ? post.publishedAt.toLocaleDateString()
+                    : "Not published"}
                 </span>
               </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0" disabled={loading === post.id}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-white"
+                      disabled={loading === post.id}
+                    >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-gray-800 border-gray-700">
+                  <DropdownMenuContent
+                    align="end"
+                    className="bg-gray-800 border-gray-700 text-white"
+                  >
                     <DropdownMenuItem asChild>
-                      <Link href={`/admin/blog/edit/${post.id}`} className="flex items-center">
-                        <Edit className="h-4 w-4 mr-2" />
+                      <Link
+                        href={`/admin/write/${post.id}`}
+                        className="flex items-center"
+                      >
+                        <Edit className="h-4 w-4 mr-2 text-white" />
                         Edit
                       </Link>
                     </DropdownMenuItem>
@@ -185,5 +234,5 @@ export function BlogManagement({ posts }: BlogManagementProps) {
         </TableBody>
       </Table>
     </div>
-  )
+  );
 }

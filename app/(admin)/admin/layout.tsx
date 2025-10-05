@@ -22,14 +22,14 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className}  antialiased`}>
         <ClerkProvider>
           <SignedOut>
             <RedirectToSignIn />
           </SignedOut>
           <SignedIn>
-            <AdminLayout>{children}</AdminLayout>
+            <main>{children}</main>
           </SignedIn>
         </ClerkProvider>
       </body>

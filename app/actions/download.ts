@@ -1,10 +1,15 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { sendEmail, generateDownloadEmailTemplate } from "@/lib/email";
+import {
+  sendEmail,
+  generateDownloadEmailTemplate,
+  sendDownloadLinkEmail,
+} from "@/lib/email";
 import {
   createDownloadToken,
   generateDownloadToken,
+  sendDownloadEmail,
   validateEmail,
 } from "@/lib/download-utils";
 
@@ -20,6 +25,7 @@ export async function downloadResourceAction(
 ): Promise<DownloadResult> {
   try {
     const email = formData.get("email") as string;
+    const name = formData.get("name") as string;
     const action = formData.get("action") as "download_now" | "send_email";
     const resourceSlug = formData.get("resourceSlug") as string;
 
@@ -52,42 +58,24 @@ export async function downloadResourceAction(
 
     // Generate download token
     const downloadToken = await createDownloadToken(resource.id, email);
-    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/download/${downloadToken}`;
+    // const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL}/api/download/${downloadToken}`;
+    const downloadUrl = `${process.env.NEXT_PUBLIC_APP_URL}/resources/${resource.slug}?download_token=${downloadToken}`;
 
     // Log download
     await prisma.resourceDownload.create({
       data: {
         email,
         resourceId: resource.id,
+        name: name || "Mate",
         action: action === "download_now" ? "DOWNLOAD" : "EMAIL",
         token: downloadToken,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
       },
     });
 
-    // Increment download count
-    await prisma.resource.update({
-      where: { id: resource.id },
-      data: {
-        downloadsCount: {
-          increment: 1,
-        },
-      },
-    });
-
     // Send email if requested
     if (action === "send_email") {
-      const emailHtml = generateDownloadEmailTemplate(
-        resource.title,
-        downloadUrl
-      );
-
-      await sendEmail({
-        to: email,
-        subject: `Your ${resource.title} Download`,
-        html: emailHtml,
-      });
-
+      await sendDownloadLinkEmail(resource.title, email, downloadUrl);
       return {
         success: true,
         message: "Download link sent to your email!",

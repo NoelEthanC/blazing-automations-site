@@ -7,7 +7,7 @@ import { supabase } from "@/lib/supabase";
 import type { BlogCategory } from "@prisma/client";
 
 // Helper function to upload files to Supabase
-async function uploadFile(file: File, bucket: string, pathPrefix = "") {
+export async function uploadFile(file: File, bucket: string, pathPrefix = "") {
   const fileExt = file.name.split(".").pop();
   const fileName = `${pathPrefix}-${Date.now()}.${fileExt}`;
 
@@ -26,10 +26,40 @@ async function uploadFile(file: File, bucket: string, pathPrefix = "") {
   return urlData.publicUrl;
 }
 
+/**
+ * Delete a file from Supabase storage
+ * @param publicUrl Full public URL of the file to delete
+ * @param bucket Supabase storage bucket name
+ */
+export async function deleteFile(publicUrl: string, bucket: string) {
+  try {
+    // Extract the file path from the public URL
+    // Supabase public URLs look like: https://<project>.supabase.co/storage/v1/object/public/<bucket>/<path>
+    const url = new URL(publicUrl);
+    const path = url.pathname.split(`/storage/v1/object/public/${bucket}/`)[1];
+
+    if (!path) {
+      throw new Error("Invalid public URL or bucket name");
+    }
+
+    const { data, error } = await supabase.storage.from(bucket).remove([path]);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error deleting file from Supabase:", error);
+    throw error;
+  }
+}
+
 // Helper function to calculate reading time
 function calculateReadingTime(content: string): number {
+  if (!content) return 0;
   const wordsPerMinute = 200;
-  const words = content.replace(/<[^>]*>/g, "").split(/\s+/).length;
+  const words = content?.replace(/<[^>]*>/g, "").split(/\s+/).length;
   return Math.ceil(words / wordsPerMinute);
 }
 
@@ -348,18 +378,20 @@ export async function updateBlogPost(
     }
 
     const updateData: any = {
-      title,
-      excerpt: excerpt || null,
-      content,
-      category: category as BlogCategory,
-      tags: tags || null,
-      videoUrl: videoUrl || null,
+      title: title ? title : currentPost?.title,
+      excerpt: excerpt ? excerpt : currentPost?.excerpt || null,
+      content: content ? content : currentPost?.content,
+      category: category ? category : (currentPost?.category as BlogCategory),
+      tags: tags ? tags : currentPost?.tags || null,
+      videoUrl: videoUrl ? videoUrl : currentPost?.videoUrl || null,
       featured,
       published,
-      readingTime: calculateReadingTime(content),
-      seoTitle: seoTitle || null,
-      seoDescription: seoDescription || null,
-      seoKeywords: seoKeywords || null,
+      readingTime: content ? calculateReadingTime(content) : 0,
+      seoTitle: seoTitle ? seoTitle : currentPost?.seoTitle || null,
+      seoDescription: seoDescription
+        ? seoDescription
+        : currentPost?.seoDescription || null,
+      seoKeywords: seoKeywords ? seoKeywords : currentPost?.seoKeywords || null,
     };
 
     // Handle thumbnail update
@@ -373,7 +405,8 @@ export async function updateBlogPost(
     }
 
     // Update slug if title changed
-    if (title !== currentPost.title) {
+    if (title && title !== currentPost.title) {
+      console.log("first", title, currentPost.title);
       const newSlug = generateSlug(title);
       const existingPost = await prisma.blogPost?.findUnique({
         where: { slug: newSlug },

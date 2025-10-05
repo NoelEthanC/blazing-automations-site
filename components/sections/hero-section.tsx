@@ -168,16 +168,17 @@ const HeroSection = () => {
       {/* Grid background */}
       <div
         className={cn(
-          "absolute inset-0 z-0 opacity-5",
+          "absolute inset-0 z-0 opacity-5 pointer-events-none",
           "[background-size:40px_40px]",
-          "[background-image:linear-gradient(to_right,#e4e4e7_1px,transparent_1px),linear-gradient(to_bottom,#e4e4e7_1px,transparent_1px)]",
-          "dark:[background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+          "[background-image:linear-gradient(to_right,#3f79ff_1px,transparent_1px),linear-gradient(to_bottom,#3f79ff_1px,transparent_1px)]",
+          "dark:[background-image:linear-gradient(to_right,#3f79ff_1px,transparent_1px),linear-gradient(to_bottom,#3f79ff_1px,transparent_1px)]"
         )}
       />
 
+      {/* Radial mask
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-midnight-blue [mask-image:radial-gradient(ellipse_at_center,transparent_1%,black)]" /> */}
       {/* Radial mask */}
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-midnight-blue [mask-image:radial-gradient(ellipse_at_center,transparent_1%,black)]" />
-
       {/* Floating dots */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="floating-dot absolute top-10 -left-60 w-full rotate-45 h-40 bg-gradient-to-r blur-3xl from-white/70 to-midnight-blue rounded-full opacity-70" />
@@ -187,7 +188,6 @@ const HeroSection = () => {
         <div className="floating-dot absolute top-60 left-1/2 w-1 h-1 bg-light-blue rounded-full opacity-40" />
         <div className="floating-dot absolute bottom-60 right-10 w-2 h-2 bg-sunray rounded-full opacity-30" />
       </div>
-
       {/* Left image with arrow */}
       <div className="absolute left-8 lg:left-16 top-1/2 transform -translate-y-1/2 hidden lg:block">
         <div ref={leftImageRef}>
@@ -208,7 +208,6 @@ const HeroSection = () => {
           <ArrowRight className="w-6 h-6 text-sunray" />
         </div>
       </div>
-
       {/* Right image with arrow */}
       <div className="absolute right-8 lg:right-8 top-52 transform -translate-y-1/2 hidden lg:block">
         <div
@@ -229,7 +228,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-
       {/* Hero content */}
       <div className="max-w-6xl mx-auto text-center relative z-30">
         <div
@@ -287,7 +285,6 @@ const HeroSection = () => {
           </Button>
         </div>
       </div>
-
       {/* Scroll Down Arrow Button */}
       <button
         onClick={handleScrollDownClick}

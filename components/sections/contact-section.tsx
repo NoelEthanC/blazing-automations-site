@@ -1,30 +1,41 @@
-"use client"
+"use client";
 
-import { useActionState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Mail, MapPin, Send, CheckCircle, AlertCircle, Loader2, Calendar } from "lucide-react"
-import { AnimatedSection } from "@/components/ui/animated-section"
-import { submitContactForm } from "@/app/actions/contact"
-import { trackEvent } from "@/lib/analytics"
-import { events } from "@/lib/eventRegistry"
-import Link from "next/link"
+import { useActionState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Mail,
+  MapPin,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  Calendar,
+} from "lucide-react";
+import { AnimatedSection } from "@/components/ui/animated-section";
+import { submitContactForm } from "@/app/actions/contact";
+import { trackEvent } from "@/lib/analytics";
+import { events } from "@/lib/eventRegistry";
+import Link from "next/link";
 
 export function ContactSection() {
-  const [state, formAction, isPending] = useActionState(submitContactForm, null)
+  const [state, formAction, isPending] = useActionState(
+    submitContactForm,
+    null
+  );
 
   const handleFormSubmit = async (formData: FormData) => {
-    const company = formData.get("company") as string
-    trackEvent(...Object.values(events.contact.sendMessage(!!company)))
-    return formAction(formData)
-  }
+    const company = formData.get("company") as string;
+    trackEvent(...Object.values(events.contact.sendMessage(!!company)));
+    return formAction(formData);
+  };
 
   const handleScheduleCallClick = () => {
-    trackEvent(...Object.values(events.contact.scheduleCall()))
-  }
+    trackEvent(...Object.values(events.contact.scheduleCall()));
+  };
 
   return (
     <AnimatedSection id="contact" className="py-36 bg-[#09111f]">
@@ -35,7 +46,8 @@ export function ContactSection() {
             <span className="gradient-text"> Touch </span>
           </h2>
           <p className="text-xl text-slate-text max-w-2xl mx-auto">
-            Ready to automate your business? Let's discuss how we can help you save time and increase efficiency.
+            Ready to automate your business? Let's discuss how we can help you
+            save time and increase efficiency.
           </p>
         </div>
 
@@ -143,11 +155,15 @@ export function ContactSection() {
           <div className="space-y-8">
             <Card className="bg-transparent border-0">
               <CardContent className="p-6">
-                <h3 className="text-xl font-semibold text-white mb-6">Get in touch</h3>
+                <h3 className="text-xl font-semibold text-white mb-6">
+                  Get in touch
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
                     <Mail className="h-5 w-5 text-[#3f79ff]" />
-                    <span className="text-gray-300">contact@blazingautomations.com</span>
+                    <span className="text-gray-300">
+                      contact@blazingautomations.com
+                    </span>
                   </div>
                   <div className="flex items-center space-x-3">
                     <MapPin className="h-5 w-5 text-[#3f79ff]" />
@@ -161,10 +177,13 @@ export function ContactSection() {
               <CardContent className="p-6">
                 <div className="flex items-center space-x-3 mb-4">
                   <Calendar className="h-5 w-5 text-[#3f79ff]" />
-                  <h3 className="text-xl font-semibold text-white">Book a Free Consultation</h3>
+                  <h3 className="text-xl font-semibold text-white">
+                    Book a Free Consultation
+                  </h3>
                 </div>
                 <p className="text-gray-400 mb-6">
-                  Schedule a 30-minute call to discuss your automation needs and get expert advice.
+                  Schedule a 30-minute call to discuss your automation needs and
+                  get expert advice.
                 </p>
                 <div className="bg-transparent rounded-lg p-8 text-center">
                   <Button
@@ -172,7 +191,11 @@ export function ContactSection() {
                     className="bg-[#3f79ff] hover:bg-[#3f79ff]/80 text-white"
                     onClick={handleScheduleCallClick}
                   >
-                    <Link href="https://calendly.com/noelethan-ch/30min" target="_blank" rel="noopener noreferrer">
+                    <Link
+                      href="https://calendly.com/noelethan-ch/30min"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       Schedule Call
                     </Link>
                   </Button>
@@ -183,5 +206,5 @@ export function ContactSection() {
         </div>
       </div>
     </AnimatedSection>
-  )
+  );
 }
