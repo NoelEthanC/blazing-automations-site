@@ -73,9 +73,9 @@ export async function getLeads({
     downloads.forEach((download) => {
       const email = download.email;
       const status = download.status;
-      if (status !== "CONFIRMED") {
-        return; // Skip non-confirmed downloads
-      }
+      // if (status !== "CONFIRMED") {
+      //   return; // Skip non-confirmed downloads
+      // }
       const existing = emailMap.get(email);
 
       if (existing) {
