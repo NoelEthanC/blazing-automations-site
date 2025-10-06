@@ -449,7 +449,7 @@ export async function createResource(prevState: any, formData: FormData) {
         thumbnail: thumbnailPath,
         filePath,
         fileType,
-        authorId: user?.id,
+        authorId: user?.id || "ethan_id",
       },
     });
 
