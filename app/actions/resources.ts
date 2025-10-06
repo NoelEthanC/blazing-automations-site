@@ -389,6 +389,7 @@ export async function uploadFile(file: File, bucket: string, pathPrefix = "") {
 export async function createResource(prevState: any, formData: FormData) {
   try {
     const user = await getCurrentUser();
+    console.log("user", user);
     await requireAdmin();
 
     const title = formData.get("title") as string;
@@ -449,7 +450,7 @@ export async function createResource(prevState: any, formData: FormData) {
         thumbnail: thumbnailPath,
         filePath,
         fileType,
-        authorId: user?.id || "ethan_id",
+        authorId: user?.id || "cmgdk15sq0000l54g18ju9pmw",
       },
     });
 
