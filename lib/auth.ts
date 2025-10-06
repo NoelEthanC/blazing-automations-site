@@ -25,7 +25,6 @@ export async function getCurrentUser() {
   try {
     const user = await currentUser();
 
-    console.log("currentUser", user);
     if (!user) {
       return null;
     }
@@ -48,6 +47,8 @@ export async function getCurrentUser() {
         role: "ADMIN",
       },
     });
+
+    console.log("dbUser", dbUser);
 
     return dbUser;
   } catch (error) {
