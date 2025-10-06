@@ -25,6 +25,7 @@ export async function getCurrentUser() {
   try {
     const user = await currentUser();
 
+    console.log("currentUser", user);
     if (!user) {
       return null;
     }
