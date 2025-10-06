@@ -94,9 +94,9 @@ export function BlogManagement({ posts }: BlogManagementProps) {
         <p className="text-gray-400 mb-6">
           Create your first blog post to get started.
         </p>
-        <Button asChild className="bg-[#3f79ff] hover:bg-[#3f79ff]/80">
+        {/* <Button asChild className="bg-[#3f79ff] hover:bg-[#3f79ff]/80">
           <Link href="/admin/blog/new">Create First Post</Link>
-        </Button>
+        </Button> */}
       </div>
     );
   }

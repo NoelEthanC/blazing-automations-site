@@ -85,7 +85,7 @@ export default function AboutPage() {
                 About Blazing Automations
               </Badge>
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                I'm <span className="text-[#fcbf5b]">Alex Johnson</span>, and I
+                I'm <span className="text-[#fcbf5b]">Noel Ethan</span>, and I
                 help businesses work smarter, not harder
               </h1>
               <p className="text-xl text-gray-300 mb-8 leading-relaxed">
@@ -106,7 +106,7 @@ export default function AboutPage() {
               <div className="aspect-square bg-gradient-to-br from-[#3f79ff]/20 to-[#fcbf5b]/20 rounded-2xl p-8 flex items-center justify-center">
                 <div className="w-full h-full bg-gray-700 rounded-xl flex items-center justify-center">
                   <span className="text-gray-400 text-lg">
-                    Professional Photo
+                    Professional Photo (Coming soon)
                   </span>
                 </div>
               </div>
