@@ -450,7 +450,7 @@ export async function createResource(prevState: any, formData: FormData) {
         thumbnail: thumbnailPath,
         filePath,
         fileType,
-        authorId: user?.id || "cmgdk15sq0000l54g18ju9pmw",
+        authorId: user?.id,
       },
     });
 
