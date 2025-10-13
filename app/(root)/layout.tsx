@@ -98,6 +98,12 @@ export default function RootLayout({
   return (
     // <ClerkProvider>
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta
+          name="impact-site-verification"
+          content="81978239-9f1b-40a2-aa74-eb4b62f78d2c"
+        />
+      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
