@@ -6,6 +6,8 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import BlogManagementHeader from "@/components/blog/blog-management-header";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminBlogPage() {
   const posts = await getAllBlogPosts();
 
