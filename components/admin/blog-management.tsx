@@ -30,6 +30,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { BlogPost } from "@prisma/client";
 
 const categoryLabels = {
   TUTORIALS_GUIDES: "Tutorials & Guides",
@@ -38,7 +39,7 @@ const categoryLabels = {
 };
 
 interface BlogManagementProps {
-  posts: any[];
+  posts: BlogPost[];
 }
 
 export function BlogManagement({ posts }: BlogManagementProps) {
@@ -129,7 +130,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                     )}
                   </div>
                   <div className="text-sm text-gray-400 mt-1">
-                    {post.readingTime} min read • {post.author.name}{" "}
+                    {post.readingTime} min read
                   </div>
                 </div>
               </TableCell>
@@ -138,21 +139,21 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                   variant="secondary"
                   className="bg-[#3f79ff]/20 text-[#3f79ff] border-[#3f79ff]/30"
                 >
-                  {categoryLabels[post.category]}
+                  {categoryLabels[post?.category]}
                 </Badge>
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Badge
-                    variant={post.published ? "default" : "secondary"}
+                    variant={post?.published ? "default" : "secondary"}
                     className={post.published ? "bg-green-600" : "bg-gray-600"}
                   >
-                    {post.published ? "Published" : "Draft"}
+                    {post?.published ? "Published" : "Draft"}
                   </Badge>
                 </div>
               </TableCell>
               <TableCell>
-                <span className="text-gray-300">{post.viewsCount}</span>
+                <span className="text-gray-300">{post?.viewsCount}</span>
               </TableCell>
               <TableCell>
                 <span className="text-gray-400 text-sm">
@@ -168,7 +169,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                       variant="ghost"
                       size="sm"
                       className="h-8 w-8 p-0 text-white"
-                      disabled={loading === post.id}
+                      disabled={loading === post?.id}
                     >
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
@@ -179,7 +180,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                   >
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/write/${post.id}`}
+                        href={`/admin/write/${post?.id}`}
                         className="flex items-center"
                       >
                         <Edit className="h-4 w-4 mr-2 text-white" />
@@ -187,10 +188,10 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleToggleStatus(post.id, "published")}
+                      onClick={() => handleToggleStatus(post?.id, "published")}
                       className="flex items-center"
                     >
-                      {post.published ? (
+                      {post?.published ? (
                         <>
                           <EyeOff className="h-4 w-4 mr-2" />
                           Unpublish
@@ -203,10 +204,10 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleToggleStatus(post.id, "featured")}
+                      onClick={() => handleToggleStatus(post?.id, "featured")}
                       className="flex items-center"
                     >
-                      {post.featured ? (
+                      {post?.featured ? (
                         <>
                           <StarOff className="h-4 w-4 mr-2" />
                           Remove from Featured
@@ -219,7 +220,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                       )}
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => handleDelete(post.id)}
+                      onClick={() => handleDelete(post?.id)}
                       className="flex items-center text-red-400 hover:text-red-300"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />

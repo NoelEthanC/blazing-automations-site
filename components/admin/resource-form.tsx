@@ -175,7 +175,7 @@ export function ResourceForm({
                   <SelectTrigger className="bg-gray-900 border-gray-700 text-white">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="bg-gray-900 border-gray-700">
+                  <SelectContent className="bg-gray-900 border-gray-700 text-white">
                     {categories.map((category) => (
                       <SelectItem key={category.value} value={category.value}>
                         {category.label}
@@ -213,7 +213,7 @@ export function ResourceForm({
                 </div>
                 <Switch
                   name="published"
-                  defaultChecked={resource?.published ?? true}
+                  defaultChecked={resource?.published ?? false}
                 />
               </div>
             </CardContent>

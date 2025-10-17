@@ -397,10 +397,10 @@ export async function createResource(prevState: any, formData: FormData) {
     const longDescription = formData.get("longDescription") as string;
     const category = formData.get("category") as string;
     const tool = formData.get("tool") as string;
-    const hasGuide = formData.get("hasGuide") === "on";
+    const hasGuide = formData.get("hasGuide") === "off";
     const guideUrl = formData.get("guideUrl") as string;
-    const featured = formData.get("featured") === "on";
-    const published = formData.get("published") === "on";
+    const featured = formData.get("featured") === "off";
+    const published = formData.get("published") === "off";
 
     const thumbnailFile = formData.get("thumbnail") as File;
     const resourceFile = formData.get("resourceFile") as File;

@@ -1,15 +1,10 @@
-import {
-  getAllResources,
-  toggleResourceStatus,
-  deleteResource,
-} from "@/app/actions/resources";
+import { getAllResources, toggleResourceStatus } from "@/app/actions/resources";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Plus,
   Edit,
-  Trash2,
   Eye,
   EyeOff,
   Star,
@@ -18,6 +13,7 @@ import {
   Calendar,
 } from "lucide-react";
 import Link from "next/link";
+import DeleteResourceButton from "@/components/admin/DeleteResourceButton";
 
 export const dynamic = "force-dynamic";
 export default async function AdminResourcesPage() {
@@ -115,8 +111,8 @@ export default async function AdminResourcesPage() {
                   <Button
                     asChild
                     size="sm"
-                    variant="outline"
-                    className="flex-1 bg-transparent"
+                    variant={"ghost"}
+                    className="flex-1 bg-transparent  text-slate-400 hover:bg-secondary-blue hover:text-white"
                   >
                     <Link href={`/admin/resources/${resource.id}/edit`}>
                       <Edit className="h-4 w-4 mr-2" />
@@ -170,16 +166,7 @@ export default async function AdminResourcesPage() {
                     </Button>
                   </form>
 
-                  <form action={deleteResource.bind(null, resource.id)}>
-                    <Button
-                      type="submit"
-                      size="sm"
-                      variant="ghost"
-                      className="text-red-400 hover:text-red-300"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </form>
+                  <DeleteResourceButton resourceId={resource.id} />
                 </div>
               </CardContent>
             </Card>

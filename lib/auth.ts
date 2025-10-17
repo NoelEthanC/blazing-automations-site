@@ -17,38 +17,48 @@ export async function requireAuth() {
 }
 
 export async function getCurrentUser() {
-  // If Clerk is not configured, return null
   if (!process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
     return null;
   }
 
   try {
     const user = await currentUser();
+    if (!user) return null;
 
-    if (!user) {
-      return null;
-    }
+    const email = user.emailAddresses[0]?.emailAddress || "";
 
-    // Sync user with database
-    const dbUser = await prisma.user.upsert({
-      where: { clerkId: user.id },
-      update: {
-        email: user.emailAddresses[0]?.emailAddress || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        role: "ADMIN",
-        updatedAt: new Date(),
-      },
-      create: {
-        clerkId: user.id,
-        email: user.emailAddresses[0]?.emailAddress || "",
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        role: "ADMIN",
+    // Try to find existing user by clerkId or email
+    let dbUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ clerkId: user.id }, { email }],
       },
     });
 
-    console.log("dbUser", dbUser);
+    if (dbUser) {
+      // Update existing
+      dbUser = await prisma.user.update({
+        where: { id: dbUser.id },
+        data: {
+          clerkId: user.id, // ensure sync
+          email,
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          role: "ADMIN",
+          updatedAt: new Date(),
+        },
+      });
+    } else {
+      // Create new user if none exists
+      dbUser = await prisma.user.create({
+        data: {
+          clerkId: user.id,
+          email,
+          firstName: user.firstName || "",
+          lastName: user.lastName || "",
+          role: "ADMIN",
+        },
+      });
+    }
 
     return dbUser;
   } catch (error) {
