@@ -1,5 +1,3 @@
-
-
 Modify and integrate a secure **email-gated download feature** for the Blazing Automations website.  
 
 ⚠️ **Important:**
