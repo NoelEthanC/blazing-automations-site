@@ -10,13 +10,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { MoreHorizontal, Save } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import RichTextEditor from "@/app/(admin)/admin/(blog)/write/editor/_components/RichTextEditor";
 import EditorNav from "./editor-nav";
 import { format } from "path";
 import { BlogPost } from "@prisma/client";
+import { Switch } from "../ui/switch";
 
 interface BlogFormProps {
   post?: BlogPost;
@@ -115,6 +129,58 @@ export function BlogForm({ post }: BlogFormProps) {
                 className="bg-gray-700 border-gray-600 text-white"
                 placeholder="Brief description of the article..."
               />
+            </CardContent>
+          </Card>
+          <Card className="bg-gray-800/50 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Publish Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="published" className="text-gray-300">
+                  Published
+                </Label>
+                <Switch
+                  id="published"
+                  name="published"
+                  defaultChecked={post?.published}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="featured" className="text-gray-300">
+                  Featured
+                </Label>
+                <Switch
+                  id="featured"
+                  name="featured"
+                  defaultChecked={post?.featured}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="category" className="text-gray-300">
+                  Category *
+                </Label>
+                <Select
+                  name="category"
+                  defaultValue={post?.category ?? "TUTORIALS_GUIDES"}
+                  required
+                >
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectItem value="TUTORIALS_GUIDES">
+                      Tutorials & Guides
+                    </SelectItem>
+                    <SelectItem value="CASE_STUDIES">Case Studies</SelectItem>
+                    <SelectItem value="SYSTEM_PROMPTS">
+                      System Prompts
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 

@@ -503,6 +503,7 @@ export async function toggleBlogPostStatus(
 
     revalidatePath("/admin/blog");
     revalidatePath("/blog");
+    revalidatePath("/sitemap.xml");
     revalidatePath("/");
 
     return { success: true };

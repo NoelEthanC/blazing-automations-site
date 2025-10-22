@@ -1,6 +1,5 @@
 "use client";
 
-import { ClientSideSuspense, RoomProvider } from "@liveblocks/react/suspense";
 import {
   ClerkProvider,
   SignInButton,
@@ -160,79 +159,6 @@ const EditorNav = ({ roomId, currentUserType, post, isPending }: any) => {
             {loading && <p className="text-sm text-gray-400">saving...</p>}
           </div>
           <div className="flex flex-1 w-full justify-end items-center gap-3 sm:gap-4">
-            <div className="">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant={"ghost"}>
-                    <MoreHorizontal />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="bg-gray-800 border-gray-700 text-white p-4">
-                  <DropdownMenuItem>
-                    <div className="flex items-center justify-between gap-2">
-                      <Label htmlFor="featured" className="text-gray-300">
-                        Featured
-                      </Label>
-                      <Switch
-                        id="featured"
-                        name="featured"
-                        defaultChecked={post?.featured}
-                        onCheckedChange={() => updateStatusHandler("featured")}
-                        checked={isFeatured === "true" || isFeatured === true}
-                      />
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-midnight-blue focus:bg-transparent">
-                    <div className="space-y-2">
-                      <Label htmlFor="category" className="text-gray-300">
-                        Category *
-                      </Label>
-                      <Select
-                        name="category"
-                        defaultValue={post?.category || "TUTORIALS_GUIDES"}
-                        required
-                        onValueChange={(value) => {
-                          setCategory(value);
-                        }}
-                      >
-                        <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                          <SelectItem value="TUTORIALS_GUIDES">
-                            Tutorials & Guides
-                          </SelectItem>
-                          <SelectItem value="CASE_STUDIES">
-                            Case Studies
-                          </SelectItem>
-                          <SelectItem value="SYSTEM_PROMPTS">
-                            System Prompts
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-            <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="published" className="text-gray-300">
-                Pub.
-              </Label>
-              <Switch
-                id="published"
-                name="published"
-                onCheckedChange={() => updateStatusHandler("published")}
-                defaultChecked={post?.title?.published}
-                checked={isPublished === "true" || isPublished === true}
-                className="
-                data-[state=checked]:bg-green-500 
-                data-[state=checked]:border-green-500
-                data-[state=unchecked]:bg-gray-700 
-                data-[state=unchecked]:border-gray-600"
-              />
-            </div>
-
             <div className="flex items-center gap-3">
               <Button
                 // onClick={updatePostHandler}
