@@ -242,6 +242,7 @@
   opacity: 0;
   transform: translateY(20px);
 }
+
 /* Custom scrollbar styling for markdown editor */
   .prose::-webkit-scrollbar {
     width: 8px;
