@@ -242,3 +242,43 @@
   opacity: 0;
   transform: translateY(20px);
 }
+/* Custom scrollbar styling for markdown editor */
+  .prose::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .prose::-webkit-scrollbar-track {
+    background: #0d1520;
+  }
+
+  .prose::-webkit-scrollbar-thumb {
+    background: #3f79ff;
+    border-radius: 4px;
+  }
+
+  .prose::-webkit-scrollbar-thumb:hover {
+    background: #5a8fff;
+  }
+
+  /* Custom syntax highlighting styles for code blocks */
+  .hljs-keyword {
+    color: #c586c0;
+    font-weight: 600;
+  }
+
+  .hljs-string {
+    color: #ce9178;
+  }
+
+  .hljs-comment {
+    color: #6a9955;
+    font-style: italic;
+  }
+
+  .hljs-number {
+    color: #b5cea8;
+  }
+
+  .hljs-function {
+    color: #dcdcaa;
+  }

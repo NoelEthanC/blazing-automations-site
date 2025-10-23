@@ -40,7 +40,7 @@ export async function GET(
         success: true,
         downloadUrl,
         filename: resource.slug
-          ? `${resource.slug}.${resource.fileType?.split("/")[1] || "file"}`
+          ? `${resource.slug}.${resource.fileType?.split("/")[1] === "x-zip-compressed" ? "zip" : resource.fileType?.split("/")[1] || "file"}`
           : "download",
       },
       { status: 200 }

@@ -7,6 +7,7 @@ import { createBlogPost } from "@/app/actions/blog";
 import { title } from "process";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { CreateArticleButton } from "../admin/create-article-button";
 
 const BlogManagementHeader = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -41,18 +42,18 @@ const BlogManagementHeader = () => {
           Manage your blog posts and articles
         </p>
       </div>
-      <Button
+
+      <CreateArticleButton />
+      {/* <Button
         onClick={handleCreateNewArticle}
         // asChild
         disabled={isLoading}
         className="bg-[#3f79ff] hover:bg-[#3f79ff]/80"
       >
-        {/* <Link href="/admin/blog/new"> */}
         <Plus className="h-4 w-4 mr-2" />
         {isLoading ? "Creating..." : "  Create New Article"}
 
-        {/* </Link> */}
-      </Button>
+      </Button> */}
     </div>
   );
 };
