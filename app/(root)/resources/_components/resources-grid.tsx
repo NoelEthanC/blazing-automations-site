@@ -61,7 +61,7 @@ export function ResourcesGrid({
                 </p>
 
                 <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span>File Type: JSON (Zipped)</span>
+                  <span>File Type: JSON</span>
                   <span>Tool: {resource.tool}</span>
                 </div>
 
