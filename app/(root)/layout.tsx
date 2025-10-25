@@ -59,7 +59,7 @@ export const metadata: Metadata = {
       "Transform your business with premium Make.com, Zapier, and n8n automation templates. Save hours of setup time with our professionally crafted workflows.",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: "https://blazingautomations.com/images/logos/blazing-logo.png",
         width: 1200,
         height: 630,
         alt: "Blazing Automations - Premium Automation Templates",
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     title: "Blazing Automations - Premium Automation Templates & Resources",
     description:
       "Transform your business with premium Make.com, Zapier, and n8n automation templates. Save hours of setup time with our professionally crafted workflows.",
-    images: ["/opengraph-image.png"],
+    images: ["https://blazingautomations.com/images/logos/blazing-logo.png"],
     creator: "@noelethan_dev",
   },
   robots: {
@@ -99,9 +99,19 @@ export default function RootLayout({
     // <ClerkProvider>
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta
-          name="impact-site-verification"
-          content="81978239-9f1b-40a2-aa74-eb4b62f78d2c"
+        <title>Blazing Automations...</title>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "Blazing Automations",
+              url: "https://blazingautomations.com",
+              logo: "https://blazingautomations.com/images/logos/blazing-logo-rounded.png",
+              sameAs: ["https://www.youtube.com/@blazingautomations"],
+            }),
+          }}
         />
       </head>
       <body className={inter.className}>

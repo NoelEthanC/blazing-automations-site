@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { createBlogPost, updateBlogPost } from "@/app/actions/blog";
 import { Button } from "@/components/ui/button";
@@ -31,21 +31,58 @@ import EditorNav from "./editor-nav";
 import { format } from "path";
 import { BlogPost } from "@prisma/client";
 import { Switch } from "../ui/switch";
+import MarkdownEditor from "@/app/(admin)/admin/(blog)/write/markdown/_components/MarkdownEditor";
+import { useDebouncedCallback } from "use-debounce";
 
 interface BlogFormProps {
   post?: BlogPost;
 }
 
+const AUTOSAVE_DELAY = 2000;
+// const STORAGE_KEY = "markdown-editor-content";
+// const TITLE_STORAGE_KEY = "markdown-editor-title";
+
 export function BlogForm({ post }: BlogFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [previewMode, setPreviewMode] = useState(false);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [isPublished, setIsPublished] = useState(post?.published || false);
+  const [isFeatured, setIsFeatured] = useState(post?.featured || false);
+  const [viewMode, setViewMode] = useState<ViewMode>("edit");
+
   const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(
     post?.thumbnail || null
   );
 
-  const [content, setContent] = useState(post?.content || "");
+  const [markdown, setMarkdown] = useState(post?.content || "");
 
+  // switch view mode shortcut
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Normalize key to lowercase for consistency
+      const key = e.key.toLowerCase();
+
+      // CTRL + S → Save
+      if ((e.ctrlKey || e.metaKey) && key === "s") {
+        e.preventDefault();
+        e.stopPropagation(); // stop it from reaching browser’s handler
+        console.log("Saving blog post...");
+        // your save logic here...
+      }
+
+      // CTRL + SHIFT + P → Toggle Preview
+      if (e.altKey && e.shiftKey && key === "p") {
+        e.preventDefault();
+        e.stopPropagation();
+        setViewMode((prev) => (prev === "edit" ? "preview" : "edit"));
+      }
+    };
+
+    // 👇 use capture phase to beat browser defaults
+    window.addEventListener("keydown", handleKeyDown, true);
+
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, []);
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -57,16 +94,16 @@ export function BlogForm({ post }: BlogFormProps) {
     }
   };
 
-  const handleSubmit = async (formData: FormData) => {
-    formData.set("content", content);
+  const handleSave = async (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    formData.set("content", markdown);
 
     console.log("formData", [...formData.entries()]);
     // return;
     startTransition(async () => {
       try {
-        const result = post
-          ? await updateBlogPost(post.id, null, formData)
-          : await createBlogPost(null, formData);
+        const result = await updateBlogPost(post.id, null, formData);
 
         if (result.success) {
           toast.success(
@@ -83,31 +120,69 @@ export function BlogForm({ post }: BlogFormProps) {
       }
     });
   };
+  console.log("post.published", post.published);
+  const handleEditorialChange = useDebouncedCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const ref = formRef.current;
+      // console.log("Handling editorial change.);
+      const formEl = formRef.current;
+      if (!formEl) return;
+      const formData = new FormData(formEl);
+      setMarkdown(value);
+      console.log("Editorial change handled:", formData);
+      formData.set("content", markdown);
+      console.log("new form", [...formData.entries()]);
+      // return;
+      startTransition(async () => {
+        try {
+          const result = await updateBlogPost(post.id, null, formData);
+
+          if (result.success) {
+            // toast.success(
+            //   post
+            //     ? "Blog post updated successfully!"
+            //     : "Blog post created successfully!"
+            // );
+            // localStorage.removeItem(STORAGE_KEY);
+            // console.log("✅ Draft removed after save");
+            // router.push("/admin/blog");
+          } else {
+            toast.error(result.error || "Something went wrong");
+          }
+        } catch (error) {
+          toast.error("Something went wrong");
+        }
+      });
+    },
+    2000
+  );
 
   return (
-    <form action={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSave} ref={formRef} className="space-y-6">
       {/* Action Buttons */}
-      <EditorNav post={post} isPending={isPending} />
+      <EditorNav
+        post={post}
+        isPending={isPending}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        handleSave={handleSave}
+      />
 
       <div className="flex items-center justify-between pt-6 border-t border-gray-700"></div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardContent className="pt-5">
-              <div>
-                <RichTextEditor
-                  value={post?.content as string}
-                  name="content"
-                  onChange={setContent}
-                  placeholder="Start writing here..."
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <MarkdownEditor
+            markdown={markdown as string}
+            name="content"
+            setMarkdown={setMarkdown}
+            placeholder="Start writing here..."
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            handleEditorialChange={handleEditorialChange}
+          />
         </div>
-
-        {/* rest of the code below */}
 
         {/* </form> */}
         {/* Sidebar */}
@@ -144,7 +219,10 @@ export function BlogForm({ post }: BlogFormProps) {
                   id="published"
                   name="published"
                   defaultChecked={post?.published}
-                />
+                  className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-300 data-[state=on]:bg-green-500 transition-colors"
+                >
+                  <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform data-[state=on]:translate-x-6 translate-x-1" />
+                </Switch>
               </div>
 
               <div className="flex items-center justify-between">

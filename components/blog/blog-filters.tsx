@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useDebouncedCallback } from "use-debounce";
 
 const categories = [
   { value: "ALL", label: "All Articles" },
@@ -39,25 +40,26 @@ export function BlogFilters({
     router.push(`/blog?${params.toString()}`);
   };
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const params = new URLSearchParams(searchParams.toString());
-    if (searchValue.trim()) {
-      params.set("search", searchValue.trim());
-    } else {
-      params.delete("search");
-    }
-    params.delete("page"); // Reset to first page
-    router.push(`/blog?${params.toString()}`);
-  };
-
+  const handleSearch = useDebouncedCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      const params = new URLSearchParams(window.location.search);
+      if (value) {
+        params.set("search", value);
+      } else {
+        params.delete("search");
+      }
+      router.push(`?${params.toString()}`);
+    },
+    300
+  );
   const clearFilters = () => {
     setSearchValue("");
     router.push("/blog");
   };
 
   return (
-    <div className="bg-gray-800/50 rounded-xl p-6 mb-8">
+    <div className="bg-secondary-blue/10 rounded-xl p-6 mb-8">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* Category Filters */}
         <div className="flex-1">
@@ -92,8 +94,9 @@ export function BlogFilters({
               <Input
                 type="text"
                 placeholder="Search articles..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                // value={searchValue}
+                defaultValue={searchParams.get("search") || currentSearch}
+                onChange={handleSearch}
                 className="pl-10 bg-gray-700 border-gray-600 rounded-full text-white placeholder-gray-400"
               />
             </div>

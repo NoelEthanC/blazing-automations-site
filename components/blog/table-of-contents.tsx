@@ -2,82 +2,74 @@
 
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface TocItem {
   id: string;
   text: string;
-  level: number;
+  level: number; // 2 for ##, 3 for ###
 }
 
 interface TableOfContentsProps {
-  content: string;
+  content: string; // markdown text
 }
 
 export function TableOfContents({ content }: TableOfContentsProps) {
   const [toc, setToc] = useState<TocItem[]>([]);
+  const [activeId, setActiveId] = useState<string>("");
+  const router = useRouter();
 
   useEffect(() => {
-    let headingCount = 0;
-
-    // ✅ Step 1: Add IDs dynamically if not present
-    const updatedHtml = content.replace(
-      /<h([1-6])([^>]*)>(.*?)<\/h\1>/g,
-      (match, level, attrs, inner) => {
-        headingCount++;
-        const id = `heading-${headingCount}`;
-        return `<h${level} id="${id}"${attrs}>${inner}</h${level}>`;
-      }
-    );
-
-    // ✅ Step 2: Extract headings with IDs
-    const headingRegex = /<h([1-6])[^>]*id="([^"]*)"[^>]*>(.*?)<\/h[1-6]>/g;
+    // 1. Match markdown headings (## and ###)
+    const headingRegex = /^(#{2,3})\s+(.*)$/gm;
     const headings: TocItem[] = [];
-    let match;
+    let match: RegExpExecArray | null;
 
-    while ((match = headingRegex.exec(updatedHtml)) !== null) {
-      headings.push({
-        id: match[2],
-        text: match[3].replace(/<[^>]*>/g, ""), // Strip inline tags
-        level: Number.parseInt(match[1]),
-      });
+    while ((match = headingRegex.exec(content)) !== null) {
+      const level = match[1].length; // number of #
+      const text = match[2].trim();
+
+      // 2. Generate the same slug ID as BlogContent
+      const id = text
+        .toLowerCase()
+        .replace(/\s+/g, "-")
+        .replace(/[^\w-]+/g, "");
+
+      headings.push({ id, text, level });
     }
 
     setToc(headings);
   }, [content]);
 
-  // ✅ Step 3: Highlight active heading on scroll
+  // 3. Observe active heading in viewport
   useEffect(() => {
     if (toc.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
+          if (entry.isIntersecting) setActiveId(entry.target.id);
         });
       },
       { rootMargin: "-20% 0% -35% 0%" }
     );
 
     toc.forEach(({ id }) => {
-      const element = document.getElementById(id);
-      if (element) observer.observe(element);
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
     });
 
     return () => observer.disconnect();
   }, [toc]);
 
-  const [activeId, setActiveId] = useState<string>("");
-
-  // ✅ Step 4: Smooth scroll with navbar offset
+  // 4. Smooth scroll to section
   const scrollToHeading = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      const navbarHeight = 100; // adjust to your navbar height
-      const y =
-        element.getBoundingClientRect().top + window.scrollY - navbarHeight;
+    const el = document.getElementById(id);
+    if (el) {
+      const yOffset = 100; // adjust for sticky navbar height
+      const y = el.getBoundingClientRect().top + window.scrollY - yOffset;
       window.scrollTo({ top: y, behavior: "smooth" });
+      router.replace(`#${id}`, { scroll: false });
     }
   };
 
@@ -99,12 +91,7 @@ export function TableOfContents({ content }: TableOfContentsProps) {
               activeId === item.id
                 ? "text-[#3f79ff] bg-[#3f79ff]/10"
                 : "text-gray-400",
-              item.level === 1 && "font-medium",
-              item.level === 2 && "ml-2",
-              item.level === 3 && "ml-4",
-              item.level === 4 && "ml-6",
-              item.level === 5 && "ml-8",
-              item.level === 6 && "ml-10"
+              item.level === 2 ? "ml-2 font-medium" : "ml-4"
             )}
           >
             {item.text}

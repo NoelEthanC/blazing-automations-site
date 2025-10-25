@@ -31,8 +31,17 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { toggleBlogPostStatus, updateBlogPost } from "@/app/actions/blog";
 import { toast } from "sonner";
+import ToggleButtons from "@/app/(admin)/admin/(blog)/write/markdown/_components/ToggleButtons";
 
-const EditorNav = ({ roomId, currentUserType, post, isPending }: any) => {
+const EditorNav = ({
+  roomId,
+  currentUserType,
+  post,
+  isPending,
+  setViewMode,
+  viewMode,
+  handleSave,
+}: any) => {
   const [documentTitle, setDocumentTitle] = useState(post?.title || "untitled");
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -116,8 +125,12 @@ const EditorNav = ({ roomId, currentUserType, post, isPending }: any) => {
   }, [title, category, isPublished, isFeatured]);
   return (
     <div>
-      <div className="collaborative-room">
+      <div className="">
         <Header>
+          <div className="px-4">
+            <ToggleButtons viewMode={viewMode} setViewMode={setViewMode} />
+          </div>
+
           <div
             ref={containerRef}
             className="flex  items-center justify-center gap-2"
@@ -148,6 +161,7 @@ const EditorNav = ({ roomId, currentUserType, post, isPending }: any) => {
             )}
 
             <Button
+              type="button"
               variant={"ghost"}
               size={`icon`}
               onClick={() => setEditing(true)}
@@ -161,7 +175,7 @@ const EditorNav = ({ roomId, currentUserType, post, isPending }: any) => {
           <div className="flex flex-1 w-full justify-end items-center gap-3 sm:gap-4">
             <div className="flex items-center gap-3">
               <Button
-                // onClick={updatePostHandler}
+                // onClick={handleSave}
                 type="submit"
                 disabled={isPending || loading}
                 className="bg-[#3f79ff] hover:bg-[#3f79ff]/80"

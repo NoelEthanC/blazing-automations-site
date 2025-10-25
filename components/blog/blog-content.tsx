@@ -1,78 +1,17 @@
 "use client";
 
+import Preview from "@/app/(admin)/admin/(blog)/write/markdown/_components/Preview";
 import sanitizeHtml from "sanitize-html";
 
 interface BlogContentProps {
   content: string;
+  title: string;
 }
 
-export function BlogContent({ content }: BlogContentProps) {
-  // Step 1: Clean the content
-  const cleanContent = sanitizeHtml(content, {
-    allowedTags: [
-      "p",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-      "h5",
-      "h6",
-      "ul",
-      "ol",
-      "li",
-      "blockquote",
-      "strong",
-      "em",
-      "code",
-      "pre",
-      "span",
-      "a",
-      "img",
-      "br",
-    ],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-      img: ["src", "alt"],
-      code: ["class"],
-      span: ["class"],
-    },
-    disallowedTagsMode: "discard", // strip iframe/script completely
-  });
-
-  // Add IDs to headings so TOC can link
-  let headingCount = 0;
-
-  const withIds = cleanContent.replace(
-    /<h([1-6])([^>]*)>(.*?)<\/h\1>/g,
-    (match, level, attrs, inner) => {
-      headingCount++;
-      const id = `heading-${headingCount}`;
-      return `<h${level} id="${id}"${attrs} class="group scroll-mt-24">${inner}</h${level}>`;
-    }
-  );
-
-  // const withIds = cleanContent.replace(
-  //   /<h([1-6])([^>]*)>(.*?)<\/h\1>/g,
-  //   (match, level, attrs, inner) => {
-  //     headingCount++;
-  //     const id = `heading-${headingCount}`;
-  //     return `
-  //     <h${level} id="${id}"${attrs} class="group scroll-mt-24">
-  //       ${inner}
-  //       <a href="#${id}" class="ml-2 opacity-0 group-hover:opacity-100 transition text-[#3f79ff]">#</a>
-  //     </h${level}>
-  //   `;
-  //   }
-  // );
-
-  // Step 2: Process code blocks
-  const processedContent = processContent(withIds);
-
+export function BlogContent({ content, title }: BlogContentProps) {
   return (
     <div className="prose prose-invert prose prose-lg max-w-none list-disc list-outside marker:text-gray-400 blog-content">
-      <div dangerouslySetInnerHTML={{ __html: processedContent }} />
-      {/* {processedContent} */}
-      {/* jdkjshdkjh */}
+      <Preview markdown={content} title={title} isEditor={false} />
     </div>
   );
 }

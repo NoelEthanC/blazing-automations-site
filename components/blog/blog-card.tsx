@@ -1,22 +1,22 @@
-import Link from "next/link"
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Calendar, Clock, Eye } from "lucide-react"
+import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, Eye } from "lucide-react";
 
 const categoryLabels = {
   TUTORIALS_GUIDES: "Tutorials & Guides",
   CASE_STUDIES: "Case Studies",
   SYSTEM_PROMPTS: "System Prompts",
-}
+};
 
 const categoryColors = {
   TUTORIALS_GUIDES: "bg-[#3f79ff]/20 text-[#3f79ff] border-[#3f79ff]/30",
   CASE_STUDIES: "bg-[#ca6678]/20 text-[#ca6678] border-[#ca6678]/30",
   SYSTEM_PROMPTS: "bg-[#fcbf5b]/20 text-[#fcbf5b] border-[#fcbf5b]/30",
-}
+};
 
 interface BlogCardProps {
-  post: any
+  post: any;
 }
 
 export function BlogCard({ post }: BlogCardProps) {
@@ -42,14 +42,19 @@ export function BlogCard({ post }: BlogCardProps) {
           {/* Featured Badge */}
           {post.featured && (
             <div className="absolute top-3 left-3">
-              <Badge className="bg-[#fcbf5b] text-gray-900 font-medium">Featured</Badge>
+              <Badge className="bg-[#fcbf5b] text-gray-900 font-medium">
+                Featured
+              </Badge>
             </div>
           )}
         </div>
 
         <div className="p-6">
           {/* Category */}
-          <Badge variant="secondary" className={`mb-3 ${categoryColors[post.category]}`}>
+          <Badge
+            variant="secondary"
+            className={`mb-3 ${categoryColors[post.category]}`}
+          >
             {categoryLabels[post.category]}
           </Badge>
 
@@ -59,7 +64,11 @@ export function BlogCard({ post }: BlogCardProps) {
           </h3>
 
           {/* Excerpt */}
-          {post.excerpt && <p className="text-gray-400 text-sm mb-4 line-clamp-3">{post.excerpt}</p>}
+          {post.excerpt && (
+            <p className="text-gray-400 text-sm mb-4 line-clamp-3">
+              {post.excerpt}
+            </p>
+          )}
 
           {/* Meta Info */}
           <div className="flex items-center justify-between text-xs text-gray-500">
@@ -86,11 +95,11 @@ export function BlogCard({ post }: BlogCardProps) {
               {post.author.lastName?.[0]}
             </div>
             <span className="text-sm text-gray-400">
-              {post.author.firstName} {post.author.lastName}
+              {post.author.firstName}
             </span>
           </div>
         </div>
       </article>
     </Link>
-  )
+  );
 }

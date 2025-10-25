@@ -180,7 +180,7 @@ export function BlogManagement({ posts }: BlogManagementProps) {
                   >
                     <DropdownMenuItem asChild>
                       <Link
-                        href={`/admin/write/${post?.id}`}
+                        href={`/admin/new-article/${post?.id}`}
                         className="flex items-center"
                       >
                         <Edit className="h-4 w-4 mr-2 text-white" />

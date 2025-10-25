@@ -49,7 +49,7 @@ export function RelatedArticles({ posts }: RelatedArticlesProps) {
                 {/* Category */}
                 <Badge
                   variant="secondary"
-                  className="text-[10px] mb-2 bg-[#3f79ff]/20 text-[#3f79ff] border-[#3f79ff]/30"
+                  className="text-[10px] mb-2 bg-[#3f79ff]/20 w-fit text-[#3f79ff] border-[#3f79ff]/30"
                 >
                   {categoryLabels[post.category]}
                 </Badge>

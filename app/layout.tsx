@@ -8,12 +8,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <meta
-          name="impact-site-verification"
-          content="04962437-f4b9-4c13-8024-fe891c0f7fc3"
-        />
-      </head>
+      <head></head>
       <body>
         {children}
 
@@ -24,5 +19,5 @@ export default function RootLayout({
 }
 
 export const metadata = {
-      generator: 'v0.app'
-    };
+  generator: "Noel Ethan",
+};

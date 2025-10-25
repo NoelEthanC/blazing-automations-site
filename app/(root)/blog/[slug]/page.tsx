@@ -7,6 +7,7 @@ import { RelatedArticles } from "@/components/blog/related-articles";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, Eye, User } from "lucide-react";
 import Image from "next/image";
+import BrevoForm from "@/components/blog/brevo-form";
 
 interface BlogPostPageProps {
   params: {
@@ -43,7 +44,7 @@ export async function generateMetadata({
         `Read ${post.title} on Blazing Automations blog`,
       type: "article",
       publishedTime: post.publishedAt?.toISOString(),
-      authors: [`${post.author.firstName} ${post.author.lastName}`],
+      authors: [`${post.author.firstName}`],
       images: post.thumbnail ? [post.thumbnail] : [],
     },
     twitter: {
@@ -112,9 +113,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 <div className="flex flex-wrap items-center gap-6 text-gray-400 text-sm mb-8 py-6 border-y border-gray-700">
                   <div className="flex items-center gap-2">
                     <User className="h-4 w-4" />
-                    <span>
-                      {post.author.firstName} {post.author.lastName}
-                    </span>
+                    <span>{post.author.firstName}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
@@ -147,21 +146,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 {/* <p className="textwhite">hdhdhdh</p> */}
                 <TableOfContents content={post.content} />
                 {/* Video Embed */}
-                {/* {!post.videoUrl && (
-                  <div className="mb-8">
-                    <div className="relative aspect-video rounded-lg overflow-hidden">
-                      <iframe
-                        src={post.videoUrl}
-                        title={post.title}
-                        className="absolute inset-0 w-full h-full"
-                        allowFullScreen
-                      />
-                    </div>
-                  </div>
-                )} */}
 
                 {/* Content */}
-                <BlogContent content={post.content} />
+                <BlogContent content={post.content} title={post.title} />
 
                 {/* Tags */}
                 {post.tags && (
@@ -189,6 +176,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           {/* Related Articles - Right Sidebar */}
           <aside className="lg:col-span-4 order-3">
             <div className="sticky top-32">
+              <BrevoForm />
               <RelatedArticles posts={relatedPosts} />
             </div>
           </aside>

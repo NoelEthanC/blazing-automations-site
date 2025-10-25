@@ -18,13 +18,14 @@ const BlogManagementHeader = () => {
     setIsLoading(true);
     const formData = new FormData();
     formData.append("title", "Untitled");
-    formData.append("content", "...");
+    formData.append("content", "");
     try {
       const result = await createBlogPost(null, formData);
 
       if (result.success) {
+        // router.push(`/admin/write/${result?.postId}`);
+        router.push(`/admin/new-article/${result?.postId}`);
         toast.success("Blog post created successfully!");
-        router.push(`/admin/write/${result?.postId}`);
       } else {
         toast.error(result.error || "Something went wrong");
       }
@@ -43,8 +44,8 @@ const BlogManagementHeader = () => {
         </p>
       </div>
 
-      <CreateArticleButton />
-      {/* <Button
+      {/* <CreateArticleButton /> */}
+      <Button
         onClick={handleCreateNewArticle}
         // asChild
         disabled={isLoading}
@@ -52,8 +53,7 @@ const BlogManagementHeader = () => {
       >
         <Plus className="h-4 w-4 mr-2" />
         {isLoading ? "Creating..." : "  Create New Article"}
-
-      </Button> */}
+      </Button>
     </div>
   );
 };
